@@ -5,13 +5,10 @@ from DICOMLib import DICOMUtils
 from .ItemModel import DICOMItem
 
 
-class DataLoader(object):
+class DataLoader():
     """
     Object responsible for loading a DICOM and notifying listeners on DICOM Load
     """
-    def __init__(self):
-        pass
-
     def __del__(self):
         slicer.dicomDatabase.cleanup()
 
@@ -39,7 +36,6 @@ class DataLoader(object):
     @staticmethod
     def get_dicom_widget():
         try:
-            dicomWidget = slicer.modules.DICOMWidget
+            return slicer.modules.DICOMWidget
         except AttributeError:
-            dicomWidget = slicer.modules.dicom.widgetRepresentation().self()
-        return dicomWidget
+            return slicer.modules.dicom.widgetRepresentation().self()

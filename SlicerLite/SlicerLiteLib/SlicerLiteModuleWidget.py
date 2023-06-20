@@ -17,7 +17,6 @@ class SlicerLiteModuleWidget(qt.QWidget):
         self.data_loader = DataLoader()
         self.item_table_model = ItemModel()
         self.item_table_view = qt.QTableView()
-        self.item_table_model.dataChanged.connect(lambda _: self.item_table_view.viewport().update())
         self.delete_button_item_delegate = DeleteButtonItemDelegate()
         self.dicom_tags_button_item_delegate = DicomMetadataButtonItemDelegate()
 
@@ -42,7 +41,6 @@ class SlicerLiteModuleWidget(qt.QWidget):
         """
         Setup the table view behavior/display
         """
-        self.item_table_model.setHorizontalHeaderLabels(["Name", "Dicom tags", "Delete"])
         self.item_table_view.setItemDelegateForColumn(1, self.dicom_tags_button_item_delegate)
         self.item_table_view.setItemDelegateForColumn(2, self.delete_button_item_delegate)
         # Hide headers
@@ -101,7 +99,7 @@ class SlicerLiteModuleWidget(qt.QWidget):
 
         # Need to add a new slot in order to avoid 3DSlicer to update this button visibility when adding a new segment
         if add_segmentation_button:
-            add_segmentation_button.clicked.connect(lambda _: self.segment_editor_widget.rotateSliceViewsToSegmentation())
+            add_segmentation_button.clicked.connect(self.segment_editor_widget.rotateSliceViewsToSegmentation)
 
     def on_click_load_dicom_directory(self) -> None:
         """

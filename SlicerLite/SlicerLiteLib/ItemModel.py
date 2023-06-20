@@ -23,7 +23,6 @@ class Item:
         self.segmentationNode.SetName("Segmentation_" + self.volumeName)
 
     def __del__(self):
-        slicer.mrmlScene.RemoveNode(self.volumeRenderingDisplayNode)
         slicer.mrmlScene.RemoveNode(self.volumeNode)
         slicer.mrmlScene.RemoveNode(self.segmentationNode)
 
@@ -64,13 +63,13 @@ class ItemModel(qt.QStandardItemModel):
 
         self.appendRow([create_item() for _ in range(3)])
 
-    def toggle_volume_visibility(self, id):
-        self.item(id).data(ItemModel.ItemUserRole).toggle_visibility()
-        currentItemVisibility = self.item(id).data(ItemModel.ItemUserRole).get_visibility()
+    def toggle_volume_visibility(self, itemId):
+        self.item(itemId).data(ItemModel.ItemUserRole).toggle_visibility()
+        currentItemVisibility = self.item(itemId).data(ItemModel.ItemUserRole).get_visibility()
         if currentItemVisibility:
             # Hide all other volumes to keep one visible volume
             for rowID in range(self.rowCount()):
-                if rowID == id:
+                if rowID == itemId:
                     continue
                 self.item(rowID).data(ItemModel.ItemUserRole).set_visibility(False)
         # Allow to notify the view that model as changed, so that the view can repaint itself

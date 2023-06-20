@@ -47,9 +47,6 @@ class ButtonItemDelegate(qt.QStyledItemDelegate):
 
 
 class DeleteButtonItemDelegate(ButtonItemDelegate):
-    def __init__(self, parent=None):
-        super(DeleteButtonItemDelegate, self).__init__(parent)
-
     def getIcon(self, index):
         return Utils.getIcon("delete")
 
@@ -60,9 +57,6 @@ class DeleteButtonItemDelegate(ButtonItemDelegate):
 
 
 class DicomMetadataButtonItemDelegate(ButtonItemDelegate):
-    def __init__(self, parent=None):
-        super(DicomMetadataButtonItemDelegate, self).__init__(parent)
-
     def getIcon(self, index):
         return Utils.getIcon("metadata")
 
