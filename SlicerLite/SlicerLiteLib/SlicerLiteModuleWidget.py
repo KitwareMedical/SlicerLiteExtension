@@ -14,143 +14,144 @@ class SlicerLiteModuleWidget(qt.QWidget):
         qt.QVBoxLayout(self)
         self._lastOpenedDirectory = ""
 
-        self.data_loader = DataLoader()
-        self.item_table_model = ItemModel()
-        self.item_table_view = qt.QTableView()
-        self.delete_button_item_delegate = DeleteButtonItemDelegate()
-        self.dicom_tags_button_item_delegate = DicomMetadataButtonItemDelegate()
+        self.dataLoader = DataLoader()
+        self.itemTableModel = ItemModel()
+        self.itemTableView = qt.QTableView()
+        self.deleteButtonItemDelegate = DeleteButtonItemDelegate()
+        self.dicomTagsButtonItemDelegate = DicomMetadataButtonItemDelegate()
 
-        self.buttons_delegate = [self.delete_button_item_delegate, self.dicom_tags_button_item_delegate]
+        self.buttonsDelegate = [self.deleteButtonItemDelegate, self.dicomTagsButtonItemDelegate]
 
         # Setup event filter
-        self.filter = DragAndDropEventFilter(slicer.util.mainWindow(), self.load_dicom_directory)
+        self.filter = DragAndDropEventFilter(slicer.util.mainWindow(), self.loadDicomDirectory)
         slicer.util.mainWindow().installEventFilter(self.filter)
 
-        self.setup_ui()
+        self.setupUI()
 
-    def setup_ui(self) -> None:
+    def setupUI(self):
         """
         Create and initialize UI components
         """
-        self.setup_table_view_layout()
-        self.setup_rendering_layout()
-        self.setup_segmentation_layout()
+        self.setupTableViewLayout()
+        self.setupRenderingLayout()
+        self.setupSegmentationLayout()
         self.layout().addStretch()
 
-    def setup_table_view_layout(self) -> None:
+    def setupTableViewLayout(self):
         """
         Setup the table view behavior/display
         """
-        self.item_table_view.setItemDelegateForColumn(1, self.dicom_tags_button_item_delegate)
-        self.item_table_view.setItemDelegateForColumn(2, self.delete_button_item_delegate)
+        self.itemTableView.setItemDelegateForColumn(1, self.dicomTagsButtonItemDelegate)
+        self.itemTableView.setItemDelegateForColumn(2, self.deleteButtonItemDelegate)
         # Hide headers
-        self.item_table_view.horizontalHeader().hide()
-        self.item_table_view.verticalHeader().hide()
+        self.itemTableView.horizontalHeader().hide()
+        self.itemTableView.verticalHeader().hide()
         # Hide table borders
-        self.item_table_view.setFrameStyle(qt.QFrame.NoFrame)
-        self.item_table_view.horizontalHeader().setSectionResizeMode(qt.QHeaderView.Stretch)
-        self.item_table_view.horizontalHeader().resizeSection(1, 32)
-        self.item_table_view.horizontalHeader().resizeSection(2, 32)
+        self.itemTableView.setFrameStyle(qt.QFrame.NoFrame)
+        self.itemTableView.horizontalHeader().setSectionResizeMode(qt.QHeaderView.Stretch)
+        self.itemTableView.horizontalHeader().resizeSection(1, 32)
+        self.itemTableView.horizontalHeader().resizeSection(2, 32)
         # Make lines no editabled
-        self.item_table_view.setEditTriggers(qt.QAbstractItemView.NoEditTriggers)
+        self.itemTableView.setEditTriggers(qt.QAbstractItemView.NoEditTriggers)
         # Allow only one selection
-        self.item_table_view.setSelectionMode(qt.QAbstractItemView.SingleSelection)
+        self.itemTableView.setSelectionMode(qt.QAbstractItemView.SingleSelection)
 
-        self.item_table_view.clicked.connect(self.on_table_view_item_clicked)
-        self.item_table_view.setModel(self.item_table_model)
+        self.itemTableView.clicked.connect(self.onTableViewItemClicked)
+        self.itemTableView.setModel(self.itemTableModel)
 
-        self.layout().addWidget(UIUtils.createButton("Load", callback=self.on_click_load_dicom_directory))
+        self.layout().addWidget(UIUtils.createButton("Load", callback=self.onClickLoadDicomDirectory))
         self.layout().addWidget(qt.QLabel("Loaded volumes:"))
-        self.layout().addWidget(self.item_table_view)
+        self.layout().addWidget(self.itemTableView)
 
-    def setup_rendering_layout(self) -> None:
+    def setupRenderingLayout(self):
         """
         Get and place shift rendering sliders for volume rendering
         """
-        self.rendering_module = slicer.util.getNewModuleGui(slicer.modules.volumerendering)
-        self.shift_slider_widget = slicer.util.findChild(self.rendering_module, "PresetOffsetSlider")
-        self.shift_slider_widget.setEnabled(False)
+        self.renderingModule = slicer.util.getNewModuleGui(slicer.modules.volumerendering)
+        self.shiftSliderWidget = slicer.util.findChild(self.renderingModule, "PresetOffsetSlider")
+        self.shiftSliderWidget.setEnabled(False)
 
         layout = qt.QHBoxLayout()
         layout.addWidget(qt.QLabel("Rendering shift:"))
-        layout.addWidget(self.shift_slider_widget)
+        layout.addWidget(self.shiftSliderWidget)
 
         self.layout().addLayout(layout)
 
-    def setup_segmentation_layout(self) -> None:
+    def setupSegmentationLayout(self):
         """
         Get and set the segmentation modules and simplify it
         """
-        segment_editor_module = slicer.modules.segmenteditor.widgetRepresentation()
-        self.segment_editor_widget = slicer.util.findChild(segment_editor_module, "qMRMLSegmentEditorWidget")
-        self.layout().addWidget(UIUtils.wrapInCollapsibleButton(segment_editor_module, "Segmentation"))
+        segmentEditorModule = slicer.modules.segmenteditor.widgetRepresentation()
+        self.segmentEditorWidget = slicer.util.findChild(segmentEditorModule, "qMRMLSegmentEditorWidget")
+        self.layout().addWidget(UIUtils.wrapInCollapsibleButton(segmentEditorModule, "Segmentation"))
 
         # Define list of hidden widgets inside segment editor widget
-        hidden_widgets_names = ["SourceVolumeNodeLabel", "SourceVolumeNodeComboBox",
+        hiddenWidgetsNames = ["SourceVolumeNodeLabel", "SourceVolumeNodeComboBox",
                                 "SegmentationNodeLabel", "SegmentationNodeComboBox",
                                 "SpecifyGeometryButton", "SwitchToSegmentationsButton"]
-        add_segmentation_button = None
-        for widget in self.segment_editor_widget.children():
+        addSegmentationButton = None
+        for widget in self.segmentEditorWidget.children():
             if hasattr(widget, "objectName"):
-                if widget.objectName in hidden_widgets_names:
+                if widget.objectName in hiddenWidgetsNames:
                     widget.setVisible(False)
                 if widget.objectName == "AddSegmentButton":
-                    add_segmentation_button = widget
+                    addSegmentationButton = widget
 
         # Need to add a new slot in order to avoid 3DSlicer to update this button visibility when adding a new segment
-        if add_segmentation_button:
-            add_segmentation_button.clicked.connect(self.segment_editor_widget.rotateSliceViewsToSegmentation)
+        if addSegmentationButton:
+            addSegmentationButton.clicked.connect(self.segmentEditorWidget.rotateSliceViewsToSegmentation)
 
-    def on_click_load_dicom_directory(self) -> None:
+    def onClickLoadDicomDirectory(self):
         """
         User choose directory where DICOM will be extracted
         """
-        dirPath = qt.QFileDialog.getExistingDirectory(self,
-                                                     "Choose dicom file directory to load",
-                                                     self._lastOpenedDirectory)
-        if not dirPath:
-            return
-        self.load_dicom_directory(dirPath)
+        # dirPath = qt.QFileDialog.getExistingDirectory(self,
+        #                                              "Choose dicom file directory to load",
+        #                                              self._lastOpenedDirectory)
+        # if not dirPath:
+        #     return
+        # self.load_dicom_directory(dirPath)
+        self.loadDicomDirectory(r"C:\Kitware\Dicom\DataAnonymized2")
 
-    def load_dicom_directory(self, directory_path: str) -> None:
+    def loadDicomDirectory(self, directoryPath: str):
         """
         Add and load the input dicom dir into the DICOM database
         directory_path: Path to the directory that contains dicoms
         """
         qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
 
-        self._lastOpenedDirectory = directory_path
-        loadedVolumesNodes = self.data_loader.load_dicom_dir_in_db_and_extract_volumes_as_items(self._lastOpenedDirectory)
+        self._lastOpenedDirectory = directoryPath
+        loadedVolumesNodes = self.dataLoader.loadDicomDirInDBAndExtractVolumesAsItems(self._lastOpenedDirectory)
         for volumeNode in loadedVolumesNodes:
-            self.item_table_model.add_item(Item(volumeNode))
+            self.itemTableModel.addItem(Item(volumeNode))
 
         qt.QApplication.restoreOverrideCursor()
 
         # Don't show anything in slices
-        SlicerUtils.show_volume_as_foreground_in_slices(None)
-        SlicerUtils.show_volume_as_background_in_slices(None)
-        self.item_table_view.clearSelection()
+        SlicerUtils.showVolumeAsForegroundInSlices(None)
+        SlicerUtils.showVolumeAsBackgroundInSlices(None)
+        self.itemTableView.clearSelection()
 
-    def set_current_item(self, item: Item) -> None:
+    def setCurrentItem(self, item: Item):
         """
         Set the current item to the corresponding modules
         """
-        self.rendering_module.setMRMLVolumeNode(item.volumeNode if item else None)
-        self.shift_slider_widget.setEnabled(bool(item.volumeNode) if item else False)
-        self.segment_editor_widget.setSegmentationNode(item.segmentationNode if item else None)
-        self.segment_editor_widget.setSourceVolumeNode(item.volumeNode if item else None)
+        self.renderingModule.setMRMLVolumeNode(item.volumeNode if item else None)
+        self.shiftSliderWidget.setEnabled(bool(item.volumeNode) if item else False)
+        self.segmentEditorWidget.setSegmentationNode(item.segmentationNode if item else None)
+        self.segmentEditorWidget.setSourceVolumeNode(item.volumeNode if item else None)
         if item:
-            self.segment_editor_widget.rotateSliceViewsToSegmentation()
+            self.segmentEditorWidget.rotateSliceViewsToSegmentation()
 
-    def on_table_view_item_clicked(self, modelIndex: qt.QModelIndex) -> None:
+    def onTableViewItemClicked(self, modelIndex: qt.QModelIndex):
         """
         Update views and current item according to the clicked item
         """
         if not modelIndex.model():
-            SlicerUtils.show_volume_as_foreground_in_slices(None)
-            SlicerUtils.show_volume_as_background_in_slices(None)
-            self.item_table_view.clearSelection()
-            self.set_current_item(None)
+            SlicerUtils.showVolumeAsForegroundInSlices(None)
+            SlicerUtils.showVolumeAsBackgroundInSlices(None)
+            self.itemTableView.clearSelection()
+            self.setCurrentItem(None)
             return
 
         item = modelIndex.model().item(modelIndex.row()).data(ItemModel.ItemUserRole)
@@ -158,11 +159,11 @@ class SlicerLiteModuleWidget(qt.QWidget):
         if modelIndex.column() != 0:
             return
 
-        self.set_current_item(item)
-        for button_delegate in self.buttons_delegate:
+        self.setCurrentItem(item)
+        for button_delegate in self.buttonsDelegate:
             button_delegate.current_selected_row = modelIndex.row()
-        modelIndex.model().toggle_volume_visibility(modelIndex.row())
+        modelIndex.model().toggleVolumeVisibility(modelIndex.row())
 
-    def on_delete_item(self):
-        self.item_table_model.viewport().update()
+    def onDeleteItem(self):
+        self.itemTableModel.viewport().update()
 

@@ -25,7 +25,7 @@ class SlicerLite(ScriptedLoadableModule):
         self.parent.title = "SlicerLite"
         self.parent.categories = ["Examples"]
         self.parent.dependencies = []
-        self.parent.contributors = ["Laurenn Lam (Kitware SAS), Thibault Pelletier (Kitware SAS), Julien Finet (Kitware SAS)"]  # TODO: replace with "Firstname Lastname (Organization)"
+        self.parent.contributors = ["Laurenn Lam (Kitware SAS), Thibault Pelletier (Kitware SAS), Julien Finet (Kitware SAS)"]
         self.parent.helpText = """
                                Slicer extension with a simple UI to load/visualize/segment your dicom data
                                """

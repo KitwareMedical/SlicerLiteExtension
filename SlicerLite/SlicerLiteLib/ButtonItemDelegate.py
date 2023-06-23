@@ -20,14 +20,14 @@ class ButtonItemDelegate(qt.QStyledItemDelegate):
     def onButtonClicked(self, model: qt.QAbstractItemModel, index: qt.QModelIndex):
         pass
 
-    def is_row_selected(self, index: qt.QModelIndex):
+    def isRowSelected(self, index: qt.QModelIndex):
         return self.current_selected_row == index.row()
 
-    def get_item(self, index: qt.QModelIndex):
+    def getItem(self, index: qt.QModelIndex):
         return index.data(ItemModel.ItemUserRole)
 
-    def paint(self, painter: qt.QPainter, option: 'QStyleOptionViewItem', index: qt.QModelIndex) -> None:
-        if self.is_row_selected(index):
+    def paint(self, painter: qt.QPainter, option: 'QStyleOptionViewItem', index: qt.QModelIndex):
+        if self.isRowSelected(index):
             button = qt.QStyleOptionButton()
             button.rect = option.rect
             button.state = qt.QStyle.State_Enabled
@@ -36,22 +36,22 @@ class ButtonItemDelegate(qt.QStyledItemDelegate):
             button.iconSize = qt.QSize(32, 32)
             qt.QApplication.style().drawControl(qt.QStyle.CE_PushButton, button, painter)
 
-    def updateEditorGeometry(self, editor: qt.QWidget, option: 'QStyleOptionViewItem', index: qt.QModelIndex) -> None:
+    def updateEditorGeometry(self, editor: qt.QWidget, option: 'QStyleOptionViewItem', index: qt.QModelIndex):
         editor.setGeometry(option.rect)
 
     def editorEvent(self, event: qt.QEvent, model: qt.QAbstractItemModel, option: 'QStyleOptionViewItem',
                     index: qt.QModelIndex) -> bool:
-        if event.type() == qt.QEvent.MouseButtonRelease and self.is_row_selected(index):
+        if event.type() == qt.QEvent.MouseButtonRelease and self.isRowSelected(index):
             self.onButtonClicked(model, index)
         return True
 
 
 class DeleteButtonItemDelegate(ButtonItemDelegate):
     def getIcon(self, index):
-        return Utils.getIcon("delete")
+        return Utils.getIcon("close")
 
     def onButtonClicked(self, model: qt.QAbstractItemModel, index: qt.QModelIndex):
-        item = self.get_item(index)
+        item = self.getItem(index)
         model.removeRow(index.row())
         del item
 
@@ -63,8 +63,8 @@ class DicomMetadataButtonItemDelegate(ButtonItemDelegate):
     def onButtonClicked(self, model: qt.QAbstractItemModel, index: qt.QModelIndex):
         from .DataLoader import DataLoader
 
-        item = self.get_item(index)
-        dicom_widget = DataLoader.get_dicom_widget()
+        item = self.getItem(index)
+        dicom_widget = DataLoader.getDicomWidget()
         dicom_browser = dicom_widget.browserWidget.dicomBrowser
         dicom_browser.dicomTableManager().setCurrentPatientsSelection([item.dicomItem.patientUID])
         dicom_browser.dicomTableManager().setCurrentStudiesSelection([item.dicomItem.studyUID])
