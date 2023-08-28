@@ -1,3 +1,4 @@
+from .Settings import *
 from .EventFilters import *
 from .SlicerUtils import *
 from .DataLoader import *

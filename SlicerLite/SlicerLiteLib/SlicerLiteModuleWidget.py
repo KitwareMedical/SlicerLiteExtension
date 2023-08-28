@@ -4,6 +4,7 @@ from .ButtonItemDelegate import DeleteButtonItemDelegate, DicomMetadataButtonIte
 from .DataLoader import DataLoader
 from .EventFilters import DragAndDropEventFilter
 from .UIUtils import *
+from .Settings import SlicerLiteSettings
 from .SlicerUtils import *
 from .VolumeItemModel import VolumeItemModel, VolumeItem
 
@@ -14,6 +15,7 @@ class SlicerLiteModuleWidget(qt.QWidget):
     def __init__(self, parent=None):
         super(SlicerLiteModuleWidget, self).__init__(parent)
         qt.QVBoxLayout(self)
+        self.settings = qt.QSettings()
         self._lastOpenedDirectory = ""
 
         self.dataLoader = DataLoader()
@@ -107,7 +109,7 @@ class SlicerLiteModuleWidget(qt.QWidget):
         """
         # dirPath = qt.QFileDialog.getExistingDirectory(self,
         #                                              "Choose dicom file directory to load",
-        #                                              self._lastOpenedDirectory)
+        #                                              SlicerLiteSettings.LastOpenedDirectory)
         # if not dirPath:
         #     return
         # self.load_dicom_directory(dirPath)
@@ -120,8 +122,8 @@ class SlicerLiteModuleWidget(qt.QWidget):
         """
         qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
 
-        self._lastOpenedDirectory = directoryPath
-        loadedVolumesNodes = self.dataLoader.loadDicomDirInDBAndExtractVolumesAsItems(self._lastOpenedDirectory)
+        SlicerLiteSettings.LastOpenedDirectory = directoryPath
+        loadedVolumesNodes = self.dataLoader.loadDicomDirInDBAndExtractVolumesAsItems(SlicerLiteSettings.LastOpenedDirectory)
         lastAddedItem = None
         for volumeNode in loadedVolumesNodes:
             lastAddedItem = VolumeItem(volumeNode)
