@@ -1,7 +1,7 @@
 from enum import Enum
 import qt, ctk
 
-from .ItemModel import *
+from .VolumeItemModel import *
 from .Utils import Utils
 
 
@@ -24,7 +24,7 @@ class ButtonItemDelegate(qt.QStyledItemDelegate):
         return self.current_selected_row == index.row()
 
     def getItem(self, index: qt.QModelIndex):
-        return index.data(ItemModel.ItemUserRole)
+        return index.data(VolumeItemModel.ItemUserRole)
 
     def paint(self, painter: qt.QPainter, option: 'QStyleOptionViewItem', index: qt.QModelIndex):
         if self.isRowSelected(index):
@@ -64,10 +64,10 @@ class DicomMetadataButtonItemDelegate(ButtonItemDelegate):
         from .DataLoader import DataLoader
 
         item = self.getItem(index)
-        dicom_widget = DataLoader.getDicomWidget()
+        dicom_widget = getDicomWidget()
         dicom_browser = dicom_widget.browserWidget.dicomBrowser
-        dicom_browser.dicomTableManager().setCurrentPatientsSelection([item.dicomItem.patientUID])
-        dicom_browser.dicomTableManager().setCurrentStudiesSelection([item.dicomItem.studyUID])
-        dicom_browser.dicomTableManager().setCurrentSeriesSelection([item.dicomItem.seriesUID])
+        dicom_browser.dicomTableManager().setCurrentPatientsSelection([item.volumeHierarchy.patientUID])
+        dicom_browser.dicomTableManager().setCurrentStudiesSelection([item.volumeHierarchy.studyUID])
+        dicom_browser.dicomTableManager().setCurrentSeriesSelection([item.volumeHierarchy.seriesUID])
 
         dicom_browser.showMetadata(dicom_browser.fileListForCurrentSelection(ctk.ctkDICOMModel.SeriesType))
