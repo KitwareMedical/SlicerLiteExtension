@@ -107,13 +107,12 @@ class SlicerLiteModuleWidget(qt.QWidget):
         """
         User choose directory where DICOM will be extracted
         """
-        # dirPath = qt.QFileDialog.getExistingDirectory(self,
-        #                                              "Choose dicom file directory to load",
-        #                                              SlicerLiteSettings.LastOpenedDirectory)
-        # if not dirPath:
-        #     return
-        # self.load_dicom_directory(dirPath)
-        self.loadDicomDirectory(r"C:\Kitware\Dicom\DataAnonymized2")
+        dirPath = qt.QFileDialog.getExistingDirectory(self,
+                                                     "Choose dicom file directory to load",
+                                                     SlicerLiteSettings.LastOpenedDirectory)
+        if not dirPath:
+            return
+        self.loadDicomDirectory(dirPath)
 
     def loadDicomDirectory(self, directoryPath: str):
         """
@@ -124,12 +123,17 @@ class SlicerLiteModuleWidget(qt.QWidget):
 
         SlicerLiteSettings.LastOpenedDirectory = directoryPath
         loadedVolumesNodes = self.dataLoader.loadDicomDirInDBAndExtractVolumesAsItems(SlicerLiteSettings.LastOpenedDirectory)
+
+        qt.QApplication.restoreOverrideCursor()
+
+        if len(loadedVolumesNodes) == 0:
+            return
+
         lastAddedItem = None
         for volumeNode in loadedVolumesNodes:
             lastAddedItem = VolumeItem(volumeNode)
             self.itemTableModel.addItem(lastAddedItem)
 
-        qt.QApplication.restoreOverrideCursor()
 
         self.setCurrentItem(lastAddedItem)
         self.itemTableView.clearSelection()

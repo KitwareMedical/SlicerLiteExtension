@@ -13,6 +13,7 @@ class VolumeHierarchy:
     studyUID: str
     seriesUID: str
     volumeNodeID: str
+    seriesDescription: str
 
 
 class VolumeItem:
