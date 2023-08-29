@@ -85,9 +85,8 @@ class SlicerLiteModuleWidget(qt.QWidget):
         """
         Get and set the segmentation modules and simplify it
         """
-        segmentEditorModule = slicer.modules.segmenteditor.widgetRepresentation()
-        self.segmentEditorWidget = slicer.util.findChild(segmentEditorModule, "qMRMLSegmentEditorWidget")
-        self.layout().addWidget(wrapInCollapsibleButton(segmentEditorModule, "Segmentation"))
+        self.segmentEditorWidget = slicer.qMRMLSegmentEditorWidget()
+        self.layout().addWidget(wrapInCollapsibleButton(self.segmentEditorWidget, "Segmentation"))
 
         # Define list of hidden widgets inside segment editor widget
         hiddenWidgetsNames = ["SourceVolumeNodeLabel", "SourceVolumeNodeComboBox",
