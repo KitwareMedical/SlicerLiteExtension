@@ -16,7 +16,6 @@ class SlicerLiteModuleWidget(qt.QWidget):
         super(SlicerLiteModuleWidget, self).__init__(parent)
         qt.QVBoxLayout(self)
         self.settings = qt.QSettings()
-        self._lastOpenedDirectory = ""
 
         self.dataLoader = DataLoader()
         self.itemTableModel = VolumeItemModel()
@@ -133,22 +132,21 @@ class SlicerLiteModuleWidget(qt.QWidget):
             lastAddedItem = VolumeItem(volumeNode)
             self.itemTableModel.addItem(lastAddedItem)
 
-
-        self.setCurrentItem(lastAddedItem)
+        self.setCurrentVolumeItem(lastAddedItem)
         self.itemTableView.clearSelection()
 
-    def setCurrentItem(self, item: VolumeItem):
+    def setCurrentVolumeItem(self, volumeItem: VolumeItem):
         """
         Set the current item to the corresponding modules
         """
-        self.renderingModule.setMRMLVolumeNode(item.volumeNode if item else None)
-        self.shiftSliderWidget.setEnabled(bool(item.volumeNode) if item else False)
-        self.segmentEditorWidget.setSegmentationNode(item.segmentationNode if item else None)
-        self.segmentEditorWidget.setSourceVolumeNode(item.volumeNode if item else None)
-        showVolumeAsForegroundInSlices(item.volumeNode.GetID() if item else None)
-        showVolumeAsBackgroundInSlices(item.volumeNode.GetID() if item else None)
+        self.renderingModule.setMRMLVolumeNode(volumeItem.volumeNode if volumeItem else None)
+        self.shiftSliderWidget.setEnabled(bool(volumeItem.volumeNode) if volumeItem else False)
+        self.segmentEditorWidget.setSegmentationNode(volumeItem.segmentationNode if volumeItem else None)
+        self.segmentEditorWidget.setSourceVolumeNode(volumeItem.volumeNode if volumeItem else None)
+        showVolumeAsForegroundInSlices(volumeItem.volumeNode.GetID() if volumeItem else None)
+        showVolumeAsBackgroundInSlices(volumeItem.volumeNode.GetID() if volumeItem else None)
         # self.itemTableView.setCurrentIndex(self.itemTableModel.indexFromItem(item))
-        if item:
+        if volumeItem:
             self.segmentEditorWidget.rotateSliceViewsToSegmentation()
 
     def onTableViewItemClicked(self, modelIndex: qt.QModelIndex):
@@ -157,15 +155,15 @@ class SlicerLiteModuleWidget(qt.QWidget):
         """
         if not modelIndex.model():
             self.itemTableView.clearSelection()
-            self.setCurrentItem(None)
+            self.setCurrentVolumeItem(None)
             return
 
-        item = modelIndex.model().item(modelIndex.row()).data(VolumeItemModel.ItemUserRole)
+        volumeItem = modelIndex.model().item(modelIndex.row()).data(VolumeItemModel.ItemUserRole)
         # We only want to select line if user click on volume's name
         if modelIndex.column() != 0:
             return
 
-        self.setCurrentItem(item)
+        self.setCurrentVolumeItem(volumeItem)
         for button_delegate in self.buttonsDelegate:
             button_delegate.current_selected_row = modelIndex.row()
         modelIndex.model().toggleVolumeVisibility(modelIndex.row())

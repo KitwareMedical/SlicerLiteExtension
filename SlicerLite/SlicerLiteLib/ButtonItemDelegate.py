@@ -61,8 +61,6 @@ class DicomMetadataButtonItemDelegate(ButtonItemDelegate):
         return getIcon("metadata")
 
     def onButtonClicked(self, model: qt.QAbstractItemModel, index: qt.QModelIndex):
-        from .DataLoader import DataLoader
-
         item = self.getItem(index)
         dicom_widget = getDicomWidget()
         dicom_browser = dicom_widget.browserWidget.dicomBrowser
