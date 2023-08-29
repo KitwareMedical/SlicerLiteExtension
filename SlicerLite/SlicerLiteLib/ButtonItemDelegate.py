@@ -2,7 +2,7 @@ from enum import Enum
 import qt, ctk
 
 from .VolumeItemModel import *
-from .Utils import Utils
+from .Utils import *
 
 
 class CustomUserRole(Enum):
@@ -48,7 +48,7 @@ class ButtonItemDelegate(qt.QStyledItemDelegate):
 
 class DeleteButtonItemDelegate(ButtonItemDelegate):
     def getIcon(self, index):
-        return Utils.getIcon("close")
+        return getIcon("close")
 
     def onButtonClicked(self, model: qt.QAbstractItemModel, index: qt.QModelIndex):
         item = self.getItem(index)
@@ -58,7 +58,7 @@ class DeleteButtonItemDelegate(ButtonItemDelegate):
 
 class DicomMetadataButtonItemDelegate(ButtonItemDelegate):
     def getIcon(self, index):
-        return Utils.getIcon("metadata")
+        return getIcon("metadata")
 
     def onButtonClicked(self, model: qt.QAbstractItemModel, index: qt.QModelIndex):
         from .DataLoader import DataLoader
