@@ -85,6 +85,10 @@ class SlicerLiteModuleWidget(qt.QWidget):
         Get and set the segmentation modules and simplify it
         """
         self.segmentEditorWidget = slicer.qMRMLSegmentEditorWidget()
+        self.segmentEditorWidget.setMRMLScene(slicer.mrmlScene)
+        self.segmentEditorNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLSegmentEditorNode")
+        self.segmentEditorWidget.setMRMLSegmentEditorNode(self.segmentEditorNode)
+
         self.layout().addWidget(wrapInCollapsibleButton(self.segmentEditorWidget, "Segmentation"))
 
         # Define list of hidden widgets inside segment editor widget
@@ -99,7 +103,10 @@ class SlicerLiteModuleWidget(qt.QWidget):
         segmentButtonWidget = slicer.util.findChild(self.segmentEditorWidget, "AddSegmentButton")
         if segmentButtonWidget:
             # Need to add a new slot in order to avoid 3DSlicer to update this button visibility when adding a new segment
-            segmentButtonWidget.clicked.connect(self.segmentEditorWidget.rotateSliceViewsToSegmentation)
+            segmentButtonWidget.clicked.connect(self.rotateSliceViewsToSegmentation)
+
+    def rotateSliceViewsToSegmentation(self):
+        self.segmentEditorWidget.rotateSliceViewsToSegmentation()
 
     def onClickLoadDicomDirectory(self):
         """
@@ -132,8 +139,9 @@ class SlicerLiteModuleWidget(qt.QWidget):
             lastAddedItem = VolumeItem(volumeNode)
             self.itemTableModel.addItem(lastAddedItem)
 
-        self.setCurrentVolumeItem(lastAddedItem)
-        self.itemTableView.clearSelection()
+        if lastAddedItem:
+            self.setCurrentVolumeItem(lastAddedItem)
+            self.itemTableView.clearSelection()
 
     def setCurrentVolumeItem(self, volumeItem: VolumeItem):
         """
@@ -147,7 +155,7 @@ class SlicerLiteModuleWidget(qt.QWidget):
         showVolumeAsBackgroundInSlices(volumeItem.volumeNode.GetID() if volumeItem else None)
         # self.itemTableView.setCurrentIndex(self.itemTableModel.indexFromItem(item))
         if volumeItem:
-            self.segmentEditorWidget.rotateSliceViewsToSegmentation()
+            self.rotateSliceViewsToSegmentation()
 
     def onTableViewItemClicked(self, modelIndex: qt.QModelIndex):
         """
