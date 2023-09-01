@@ -5,16 +5,12 @@ from .VolumeItemModel import *
 from .Utils import *
 
 
-class CustomUserRole(Enum):
-    Visibility = qt.Qt.DisplayRole + 1
-
-
 class ButtonItemDelegate(qt.QStyledItemDelegate):
     def __init__(self, parent=None):
         super(ButtonItemDelegate, self).__init__(parent)
         self.current_selected_row = -1
 
-    def getIcon(self, data):
+    def getIcon(self):
         pass
 
     def onButtonClicked(self, model: qt.QAbstractItemModel, index: qt.QModelIndex):
@@ -26,28 +22,21 @@ class ButtonItemDelegate(qt.QStyledItemDelegate):
     def getItem(self, index: qt.QModelIndex):
         return index.data(VolumeItemModel.ItemUserRole)
 
-    def paint(self, painter: qt.QPainter, option: 'QStyleOptionViewItem', index: qt.QModelIndex):
-        if self.isRowSelected(index):
-            button = qt.QStyleOptionButton()
-            button.rect = option.rect
-            button.state = qt.QStyle.State_Enabled
-            button.text = ""
-            button.icon = self.getIcon(index)
-            button.iconSize = qt.QSize(32, 32)
-            qt.QApplication.style().drawControl(qt.QStyle.CE_PushButton, button, painter)
+    def createEditor(self, parent, option, index):
+        if index.column() in (1, 2):
+            button = qt.QPushButton(parent)
+            button.icon = self.getIcon()
+            button.iconSize = qt.QSize(22, 22)
+            button.clicked.connect(lambda _:self.onButtonClicked(index.model(), index))
+            return button
 
     def updateEditorGeometry(self, editor: qt.QWidget, option: 'QStyleOptionViewItem', index: qt.QModelIndex):
-        editor.setGeometry(option.rect)
-
-    def editorEvent(self, event: qt.QEvent, model: qt.QAbstractItemModel, option: 'QStyleOptionViewItem',
-                    index: qt.QModelIndex) -> bool:
-        if event.type() == qt.QEvent.MouseButtonRelease and self.isRowSelected(index):
-            self.onButtonClicked(model, index)
-        return True
+        if editor:
+            editor.setGeometry(option.rect)
 
 
 class DeleteButtonItemDelegate(ButtonItemDelegate):
-    def getIcon(self, index):
+    def getIcon(self):
         return getIcon("close")
 
     def onButtonClicked(self, model: qt.QAbstractItemModel, index: qt.QModelIndex):
@@ -57,7 +46,7 @@ class DeleteButtonItemDelegate(ButtonItemDelegate):
 
 
 class DicomMetadataButtonItemDelegate(ButtonItemDelegate):
-    def getIcon(self, index):
+    def getIcon(self):
         return getIcon("metadata")
 
     def onButtonClicked(self, model: qt.QAbstractItemModel, index: qt.QModelIndex):

@@ -16,6 +16,7 @@ class SlicerLiteModuleWidget(qt.QWidget):
         super(SlicerLiteModuleWidget, self).__init__(parent)
         qt.QVBoxLayout(self)
         self.settings = qt.QSettings()
+        self.lastIndex = None
 
         self.dataLoader = DataLoader()
         self.itemTableModel = VolumeItemModel()
@@ -137,7 +138,8 @@ class SlicerLiteModuleWidget(qt.QWidget):
         lastAddedItem = None
         for volumeNode in loadedVolumesNodes:
             lastAddedItem = VolumeItem(volumeNode)
-            self.itemTableModel.addItem(lastAddedItem)
+            index = self.itemTableModel.addItem(lastAddedItem)
+            self.itemTableView.closePersistentEditor(index)
 
         if lastAddedItem:
             self.setCurrentVolumeItem(lastAddedItem)
@@ -172,7 +174,13 @@ class SlicerLiteModuleWidget(qt.QWidget):
             return
 
         self.setCurrentVolumeItem(volumeItem)
-        for button_delegate in self.buttonsDelegate:
-            button_delegate.current_selected_row = modelIndex.row()
+
+        if self.lastIndex:
+            self.itemTableView.closePersistentEditor(self.itemTableModel.index(self.lastIndex.row(), 1))
+            self.itemTableView.closePersistentEditor(self.itemTableModel.index(self.lastIndex.row(), 2))
+        self.itemTableView.openPersistentEditor(self.itemTableModel.index(modelIndex.row(), 1))
+        self.itemTableView.openPersistentEditor(self.itemTableModel.index(modelIndex.row(), 2))
+        self.lastIndex = modelIndex
+
         modelIndex.model().toggleVolumeVisibility(modelIndex.row())
 

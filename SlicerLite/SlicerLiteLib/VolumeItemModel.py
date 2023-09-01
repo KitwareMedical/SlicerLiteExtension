@@ -49,7 +49,7 @@ class VolumeItem:
             resetOriginalSlicesOrientations()
             slicer.util.resetThreeDViews()
 
-    def toggle_visibility(self):
+    def toggleVisibility(self):
         self.set_visibility(not self.getVisibility())
 
 
@@ -60,15 +60,17 @@ class VolumeItemModel(qt.QStandardItemModel):
         super(VolumeItemModel, self).__init__(parent)
 
     def addItem(self, item: VolumeItem):
-        def createItem():
-            newItem = qt.QStandardItem(item.volumeName)
+        def createItem(i):
+            displayText = item.volumeName if i == 0 else ""
+            newItem = qt.QStandardItem(displayText)
             newItem.setData(item, VolumeItemModel.ItemUserRole)
             return newItem
 
-        self.appendRow([createItem() for _ in range(3)])
+        self.appendRow([createItem(i) for i in range(3)])
+        return self.index(self.rowCount(), self.columnCount())
 
     def toggleVolumeVisibility(self, itemId):
-        self.item(itemId).data(VolumeItemModel.ItemUserRole).toggle_visibility()
+        self.item(itemId).data(VolumeItemModel.ItemUserRole).toggleVisibility()
         currentItemVisibility = self.item(itemId).data(VolumeItemModel.ItemUserRole).getVisibility()
         if currentItemVisibility:
             # Hide all other volumes to keep one visible volume
