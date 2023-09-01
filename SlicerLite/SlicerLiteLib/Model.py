@@ -3,7 +3,7 @@ import slicer
 
 from dataclasses import dataclass
 
-from .SlicerUtils import *
+from SlicerLiteLib import SlicerUtils
 
 
 @dataclass
@@ -23,7 +23,7 @@ class VolumeItem:
         self.volumeName = self.volumeNode.GetName()
         self.volumeRenderingDisplayNode = self.initializeRendering()
         self.volumeNode.SetDisplayVisibility(False)
-        self.segmentationNode = addNode("vtkMRMLSegmentationNode")
+        self.segmentationNode = SlicerUtils.addNode("vtkMRMLSegmentationNode")
         self.segmentationNode.SetName("Segmentation_" + self.volumeName)
 
     def __del__(self):
@@ -34,7 +34,7 @@ class VolumeItem:
         volRenLogic = slicer.modules.volumerendering.logic()
         displayNode = volRenLogic.CreateDefaultVolumeRenderingNodes(self.volumeNode)
         displayNode.SetVisibility(False)
-        renderingPreset = createRenderingPreset()
+        renderingPreset = SlicerUtils.createRenderingPreset()
         displayNode.GetVolumePropertyNode().Copy(renderingPreset)
         return displayNode
 
@@ -44,9 +44,9 @@ class VolumeItem:
     def set_visibility(self, visible):
         self.volumeNode.SetDisplayVisibility(visible)
         if visible:
-            showVolumeAsForegroundInSlices(self.volumeNode.GetID())
-            resetSliceViews()
-            resetOriginalSlicesOrientations()
+            SlicerUtils.showVolumeAsForegroundInSlices(self.volumeNode.GetID())
+            SlicerUtils.resetSliceViews()
+            SlicerUtils.resetOriginalSlicesOrientations()
             slicer.util.resetThreeDViews()
 
     def toggleVisibility(self):

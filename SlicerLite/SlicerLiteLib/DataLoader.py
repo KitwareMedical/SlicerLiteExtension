@@ -2,8 +2,7 @@ from typing import List
 
 import qt, slicer
 from DICOMLib import DICOMUtils
-from .VolumeItemModel import VolumeHierarchy
-from .SlicerUtils import *
+from SlicerLiteLib import Model, SlicerUtils
 
 
 class DataLoader():
@@ -17,7 +16,7 @@ class DataLoader():
     def __del__(self):
         DICOMUtils.closeTemporaryDatabase(self.database.originalDatabaseDir)
 
-    def loadDicomDirInDBAndExtractVolumesAsItems(self, dicomDirectoryPath: str) -> List[VolumeHierarchy]:
+    def loadDicomDirInDBAndExtractVolumesAsItems(self, dicomDirectoryPath: str) -> List[Model.VolumeHierarchy]:
         loadedVolumeHierarchy = []
 
         if not self.database:
@@ -34,7 +33,7 @@ class DataLoader():
                     if not self.isVolumeItemHierarchyAlreadyAdded(patientUID, studyUID, seriesUID, seriesDescription):
                         volumeNodeID = DICOMUtils.loadSeriesByUID([seriesUID])
                         if len(volumeNodeID) > 0:
-                            loadedVolumeHierarchy.append(VolumeHierarchy(patientUID, studyUID, seriesUID, volumeNodeID[0], seriesDescription))
+                            loadedVolumeHierarchy.append(Model.VolumeHierarchy(patientUID, studyUID, seriesUID, volumeNodeID[0], seriesDescription))
 
         if len(loadedVolumeHierarchy) == 0:
             slicer.util.warningDisplay("No volume has been found from DICOM directory or volume already added.")

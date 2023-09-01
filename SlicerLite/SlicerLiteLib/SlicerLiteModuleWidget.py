@@ -1,12 +1,6 @@
 import qt, slicer
 
-from .ButtonItemDelegate import DeleteButtonItemDelegate, DicomMetadataButtonItemDelegate
-from .DataLoader import DataLoader
-from .EventFilters import DragAndDropEventFilter
-from .UIUtils import *
-from .Settings import SlicerLiteSettings
-from .SlicerUtils import *
-from .VolumeItemModel import VolumeItemModel, VolumeItem
+from SlicerLiteLib import Delegates, DataLoader, EventFilters, UIUtils, Settings, SlicerUtils, Model
 
 
 
@@ -19,15 +13,15 @@ class SlicerLiteModuleWidget(qt.QWidget):
         self.lastIndex = None
 
         self.dataLoader = DataLoader()
-        self.itemTableModel = VolumeItemModel()
+        self.itemTableModel = Model.VolumeItemModel()
         self.itemTableView = qt.QTableView()
-        self.deleteButtonItemDelegate = DeleteButtonItemDelegate()
-        self.dicomTagsButtonItemDelegate = DicomMetadataButtonItemDelegate()
+        self.deleteButtonItemDelegate = Delegates.DeleteButtonItemDelegate()
+        self.dicomTagsButtonItemDelegate = Delegates.DicomMetadataButtonItemDelegate()
 
         self.buttonsDelegate = [self.deleteButtonItemDelegate, self.dicomTagsButtonItemDelegate]
 
         # Setup event filter
-        self.filter = DragAndDropEventFilter(slicer.util.mainWindow(), self.loadDicomDirectory)
+        self.filter = EventFilters.DragAndDropEventFilter(slicer.util.mainWindow(), self.loadDicomDirectory)
         slicer.util.mainWindow().installEventFilter(self.filter)
 
         self.setupUI()
@@ -63,7 +57,7 @@ class SlicerLiteModuleWidget(qt.QWidget):
         self.itemTableView.clicked.connect(self.onTableViewItemClicked)
         self.itemTableView.setModel(self.itemTableModel)
 
-        self.layout().addWidget(createButton("Load", callback=self.onClickLoadDicomDirectory))
+        self.layout().addWidget(UIUtils.createButton("Load", callback=self.onClickLoadDicomDirectory))
         self.layout().addWidget(qt.QLabel("Loaded volumes:"))
         self.layout().addWidget(self.itemTableView)
 
@@ -90,7 +84,7 @@ class SlicerLiteModuleWidget(qt.QWidget):
         self.segmentEditorNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLSegmentEditorNode")
         self.segmentEditorWidget.setMRMLSegmentEditorNode(self.segmentEditorNode)
 
-        self.layout().addWidget(wrapInCollapsibleButton(self.segmentEditorWidget, "Segmentation"))
+        self.layout().addWidget(UIUtils.wrapInCollapsibleButton(self.segmentEditorWidget, "Segmentation"))
 
         # Define list of hidden widgets inside segment editor widget
         hiddenWidgetsNames = ["SourceVolumeNodeLabel", "SourceVolumeNodeComboBox",
@@ -127,8 +121,8 @@ class SlicerLiteModuleWidget(qt.QWidget):
         """
         qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
 
-        SlicerLiteSettings.LastOpenedDirectory = directoryPath
-        loadedVolumesNodes = self.dataLoader.loadDicomDirInDBAndExtractVolumesAsItems(SlicerLiteSettings.LastOpenedDirectory)
+        Settings.SlicerLiteSettings.LastOpenedDirectory = directoryPath
+        loadedVolumesNodes = self.dataLoader.loadDicomDirInDBAndExtractVolumesAsItems(Settings.SlicerLiteSettings.LastOpenedDirectory)
 
         qt.QApplication.restoreOverrideCursor()
 
@@ -137,7 +131,7 @@ class SlicerLiteModuleWidget(qt.QWidget):
 
         lastAddedItem = None
         for volumeNode in loadedVolumesNodes:
-            lastAddedItem = VolumeItem(volumeNode)
+            lastAddedItem = Model.VolumeItem(volumeNode)
             index = self.itemTableModel.addItem(lastAddedItem)
             self.itemTableView.closePersistentEditor(index)
 
@@ -145,7 +139,7 @@ class SlicerLiteModuleWidget(qt.QWidget):
             self.setCurrentVolumeItem(lastAddedItem)
             self.itemTableView.clearSelection()
 
-    def setCurrentVolumeItem(self, volumeItem: VolumeItem):
+    def setCurrentVolumeItem(self, volumeItem: Model.VolumeItem):
         """
         Set the current item to the corresponding modules
         """
@@ -153,8 +147,8 @@ class SlicerLiteModuleWidget(qt.QWidget):
         self.shiftSliderWidget.setEnabled(bool(volumeItem.volumeNode) if volumeItem else False)
         self.segmentEditorWidget.setSegmentationNode(volumeItem.segmentationNode if volumeItem else None)
         self.segmentEditorWidget.setSourceVolumeNode(volumeItem.volumeNode if volumeItem else None)
-        showVolumeAsForegroundInSlices(volumeItem.volumeNode.GetID() if volumeItem else None)
-        showVolumeAsBackgroundInSlices(volumeItem.volumeNode.GetID() if volumeItem else None)
+        SlicerUtils.showVolumeAsForegroundInSlices(volumeItem.volumeNode.GetID() if volumeItem else None)
+        SlicerUtils.showVolumeAsBackgroundInSlices(volumeItem.volumeNode.GetID() if volumeItem else None)
         # self.itemTableView.setCurrentIndex(self.itemTableModel.indexFromItem(item))
         if volumeItem:
             self.rotateSliceViewsToSegmentation()
@@ -168,7 +162,7 @@ class SlicerLiteModuleWidget(qt.QWidget):
             self.setCurrentVolumeItem(None)
             return
 
-        volumeItem = modelIndex.model().item(modelIndex.row()).data(VolumeItemModel.ItemUserRole)
+        volumeItem = modelIndex.model().item(modelIndex.row()).data(Model.VolumeItemModel.ItemUserRole)
         # We only want to select line if user click on volume's name
         if modelIndex.column() != 0:
             return
