@@ -26,6 +26,9 @@ class VolumeItem:
         self.segmentationNode = SlicerUtils.addNode("vtkMRMLSegmentationNode")
         self.segmentationNode.SetName("Segmentation_" + self.volumeName)
 
+    def __ne__(self, other):
+        return self.volumeName == other.volumeName
+
     def __del__(self):
         slicer.mrmlScene.RemoveNode(self.volumeNode)
         slicer.mrmlScene.RemoveNode(self.segmentationNode)
@@ -68,6 +71,25 @@ class VolumeItemModel(qt.QStandardItemModel):
 
         self.appendRow([createItem(i) for i in range(3)])
         return self.index(self.rowCount(), self.columnCount())
+
+    def getVolumeItemFromId(self, id):
+        """
+        Get the VolumeItem at the id row position.
+        If not found, then return None
+        """
+        if id < self.rowCount():
+            return self.item(id).data(VolumeItemModel.ItemUserRole)
+        return None
+
+    def getVolumeIdFromVolumeItem(self, volumeItem: VolumeItem):
+        """
+        Get the index of the input volumeItem in the model list
+        If not found, return -1
+        """
+        for i in range(self.rowCount()):
+            if self.getVolumeItemFromId(i) == volumeItem:
+                return i
+        return -1
 
     def toggleVolumeVisibility(self, itemId):
         self.item(itemId).data(VolumeItemModel.ItemUserRole).toggleVisibility()

@@ -10,13 +10,14 @@ class SlicerLiteModuleWidget(qt.QWidget):
         super(SlicerLiteModuleWidget, self).__init__(parent)
         qt.QVBoxLayout(self)
         self.settings = qt.QSettings()
-        self.lastIndex = None
+        self.lastSelectedRowIndex = -1
 
         self.dataLoader = DataLoader()
         self.itemTableModel = Model.VolumeItemModel()
         self.itemTableView = qt.QTableView()
         self.deleteButtonItemDelegate = Delegates.DeleteButtonItemDelegate()
         self.dicomTagsButtonItemDelegate = Delegates.DicomMetadataButtonItemDelegate()
+        self.deleteButtonItemDelegate.modelDeletedSignal.connect(self.onDeleteVolumeItem)
 
         self.buttonsDelegate = [self.deleteButtonItemDelegate, self.dicomTagsButtonItemDelegate]
 
@@ -47,8 +48,7 @@ class SlicerLiteModuleWidget(qt.QWidget):
         # Hide table borders
         self.itemTableView.setFrameStyle(qt.QFrame.NoFrame)
         self.itemTableView.horizontalHeader().setSectionResizeMode(qt.QHeaderView.Stretch)
-        self.itemTableView.horizontalHeader().resizeSection(1, 32)
-        self.itemTableView.horizontalHeader().resizeSection(2, 32)
+        self.itemTableView.resizeColumnsToContents()
         # Make lines no editabled
         self.itemTableView.setEditTriggers(qt.QAbstractItemView.NoEditTriggers)
         # Allow only one selection
@@ -150,8 +150,31 @@ class SlicerLiteModuleWidget(qt.QWidget):
         SlicerUtils.showVolumeAsForegroundInSlices(volumeItem.volumeNode.GetID() if volumeItem else None)
         SlicerUtils.showVolumeAsBackgroundInSlices(volumeItem.volumeNode.GetID() if volumeItem else None)
         # self.itemTableView.setCurrentIndex(self.itemTableModel.indexFromItem(item))
+        # Turn 3D visibility of volume to TRUE
+        currentVolumeItemId = self.itemTableModel.getVolumeIdFromVolumeItem(volumeItem)
+        self.changeSelectedRow(currentVolumeItemId)
+        self.itemTableModel.toggleVolumeVisibility(currentVolumeItemId)
         if volumeItem:
             self.rotateSliceViewsToSegmentation()
+
+    def changeSelectedRow(self, selectedRowId):
+        if selectedRowId >= 0:
+            self.itemTableView.clearSelection()
+            self.itemTableView.selectionModel().setCurrentIndex(self.itemTableModel.index(selectedRowId, 0), qt.QItemSelectionModel.Select)
+
+    def onDeleteVolumeItem(self):
+        if self.itemTableModel.rowCount() > 0:
+            self.setCurrentVolumeItem(self.itemTableModel.getVolumeItemFromId(0))
+            self.setCurrentSelectedLineOnTableView(0)
+            self.lastSelectedRowIndex = 0
+
+    def setCurrentSelectedLineOnTableView(self, rowID):
+        if self.lastSelectedRowIndex >= 0:
+            self.itemTableView.closePersistentEditor(self.itemTableModel.index(self.lastSelectedRowIndex, 1))
+            self.itemTableView.closePersistentEditor(self.itemTableModel.index(self.lastSelectedRowIndex, 2))
+        self.itemTableView.openPersistentEditor(self.itemTableModel.index(rowID, 1))
+        self.itemTableView.openPersistentEditor(self.itemTableModel.index(rowID, 2))
+        self.lastSelectedRowIndex = rowID
 
     def onTableViewItemClicked(self, modelIndex: qt.QModelIndex):
         """
@@ -168,13 +191,4 @@ class SlicerLiteModuleWidget(qt.QWidget):
             return
 
         self.setCurrentVolumeItem(volumeItem)
-
-        if self.lastIndex:
-            self.itemTableView.closePersistentEditor(self.itemTableModel.index(self.lastIndex.row(), 1))
-            self.itemTableView.closePersistentEditor(self.itemTableModel.index(self.lastIndex.row(), 2))
-        self.itemTableView.openPersistentEditor(self.itemTableModel.index(modelIndex.row(), 1))
-        self.itemTableView.openPersistentEditor(self.itemTableModel.index(modelIndex.row(), 2))
-        self.lastIndex = modelIndex
-
-        modelIndex.model().toggleVolumeVisibility(modelIndex.row())
-
+        self.setCurrentSelectedLineOnTableView(modelIndex.row())

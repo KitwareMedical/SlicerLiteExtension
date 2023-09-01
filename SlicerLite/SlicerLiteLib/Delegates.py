@@ -36,6 +36,10 @@ class ButtonItemDelegate(qt.QStyledItemDelegate):
 
 class DeleteButtonItemDelegate(ButtonItemDelegate):
 
+    def __init__(self, parent=None):
+        super(DeleteButtonItemDelegate, self).__init__(parent)
+        self.modelDeletedSignal = Utils.Signal()
+
     def getIcon(self):
         return Utils.getIcon("close")
 
@@ -43,6 +47,7 @@ class DeleteButtonItemDelegate(ButtonItemDelegate):
         item = self.getItem(index)
         model.removeRow(index.row())
         del item
+        self.modelDeletedSignal.emit()
 
 
 class DicomMetadataButtonItemDelegate(ButtonItemDelegate):
