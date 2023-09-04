@@ -141,7 +141,7 @@ class SlicerLiteModuleWidget(qt.QWidget):
 
     def setCurrentVolumeItem(self, volumeItem: Model.VolumeItem):
         """
-        Set the current item to the corresponding modules
+        Set the current item to the corresponding modules and toggle its visibility
         """
         self.renderingModule.setMRMLVolumeNode(volumeItem.volumeNode if volumeItem else None)
         self.shiftSliderWidget.setEnabled(bool(volumeItem.volumeNode) if volumeItem else False)
@@ -150,25 +150,35 @@ class SlicerLiteModuleWidget(qt.QWidget):
         SlicerUtils.showVolumeAsForegroundInSlices(volumeItem.volumeNode.GetID() if volumeItem else None)
         SlicerUtils.showVolumeAsBackgroundInSlices(volumeItem.volumeNode.GetID() if volumeItem else None)
         # self.itemTableView.setCurrentIndex(self.itemTableModel.indexFromItem(item))
-        # Turn 3D visibility of volume to TRUE
         currentVolumeItemId = self.itemTableModel.getVolumeIdFromVolumeItem(volumeItem)
         self.changeSelectedRow(currentVolumeItemId)
+        # Turn 3D visibility of volume to TRUE
         self.itemTableModel.toggleVolumeVisibility(currentVolumeItemId)
         if volumeItem:
             self.rotateSliceViewsToSegmentation()
 
     def changeSelectedRow(self, selectedRowId):
-        if selectedRowId >= 0:
+        """
+        Manually change the selected row to the selectedRowId
+        """
+        if 0 <= selectedRowId < self.itemTableView.rowCount:
             self.itemTableView.clearSelection()
             self.itemTableView.selectionModel().setCurrentIndex(self.itemTableModel.index(selectedRowId, 0), qt.QItemSelectionModel.Select)
 
     def onDeleteVolumeItem(self):
+        """
+        Called after an item is deleted
+        Set the current item to the first one
+        """
         if self.itemTableModel.rowCount() > 0:
             self.setCurrentVolumeItem(self.itemTableModel.getVolumeItemFromId(0))
             self.setCurrentSelectedLineOnTableView(0)
             self.lastSelectedRowIndex = 0
 
     def setCurrentSelectedLineOnTableView(self, rowID):
+        """
+        Update the display columns item on the input rowID (open and close persistent editors = buttons)
+        """
         if self.lastSelectedRowIndex >= 0:
             self.itemTableView.closePersistentEditor(self.itemTableModel.index(self.lastSelectedRowIndex, 1))
             self.itemTableView.closePersistentEditor(self.itemTableModel.index(self.lastSelectedRowIndex, 2))
