@@ -25,6 +25,7 @@ class VolumeItem:
         self.volumeNode.SetDisplayVisibility(False)
         self.segmentationNode = SlicerUtils.addNode("vtkMRMLSegmentationNode")
         self.segmentationNode.SetName("Segmentation_" + self.volumeName)
+        self.shiftRenderingValue = 0
 
     def __ne__(self, other):
         return self.volumeName == other.volumeName
