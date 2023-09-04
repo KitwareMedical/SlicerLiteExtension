@@ -44,7 +44,7 @@ class VolumeItem:
     def getVisibility(self) -> bool:
         return self.volumeNode.GetDisplayNode().GetVisibility()
 
-    def set_visibility(self, visible):
+    def setVisibility(self, visible):
         self.volumeNode.SetDisplayVisibility(visible)
         if visible:
             SlicerUtils.showVolumeAsForegroundInSlices(self.volumeNode.GetID())
@@ -53,7 +53,7 @@ class VolumeItem:
             slicer.util.resetThreeDViews()
 
     def toggleVisibility(self):
-        self.set_visibility(not self.getVisibility())
+        self.setVisibility(not self.getVisibility())
 
 
 class VolumeItemModel(qt.QStandardItemModel):
@@ -99,6 +99,6 @@ class VolumeItemModel(qt.QStandardItemModel):
             for rowID in range(self.rowCount()):
                 if rowID == itemId:
                     continue
-                self.item(rowID).data(VolumeItemModel.ItemUserRole).set_visibility(False)
+                self.item(rowID).data(VolumeItemModel.ItemUserRole).setVisibility(False)
         # Allow to notify the view that model as changed, so that the view can repaint itself
         self.dataChanged.emit(self.index(0, 0), self.index(self.rowCount() - 1, self.columnCount() - 1))
