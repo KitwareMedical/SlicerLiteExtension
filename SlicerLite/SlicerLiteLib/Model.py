@@ -46,6 +46,7 @@ class VolumeItem:
 
     def setVisibility(self, visible):
         self.volumeNode.SetDisplayVisibility(visible)
+        self.segmentationNode.SetDisplayVisibility(visible)
         if visible:
             SlicerUtils.showVolumeAsForegroundInSlices(self.volumeNode.GetID())
             SlicerUtils.resetSliceViews()
