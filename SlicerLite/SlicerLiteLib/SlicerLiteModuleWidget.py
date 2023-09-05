@@ -161,7 +161,7 @@ class SlicerLiteModuleWidget(qt.QWidget):
         """
         Manually change the selected row to the selectedRowId
         """
-        if 0 <= selectedRowId < self.itemTableView.rowCount:
+        if 0 <= selectedRowId < self.itemTableModel.rowCount:
             self.itemTableView.clearSelection()
             self.itemTableView.selectionModel().setCurrentIndex(self.itemTableModel.index(selectedRowId, 0), qt.QItemSelectionModel.Select)
 
