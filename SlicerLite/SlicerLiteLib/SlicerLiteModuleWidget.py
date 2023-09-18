@@ -196,8 +196,7 @@ class SlicerLiteModuleWidget(qt.QWidget):
             return
 
         volumeItem = modelIndex.model().item(modelIndex.row()).data(Model.VolumeItemModel.ItemUserRole)
-        # We only want to select line if user click on volume's name
-        if modelIndex.column() != 0 or modelIndex.row() == self.lastSelectedRowIndex:
+        if modelIndex.row() == self.lastSelectedRowIndex:
             return
 
         # Save current shift rendering value
