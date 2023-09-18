@@ -45,9 +45,11 @@ class DeleteButtonItemDelegate(ButtonItemDelegate):
 
     def onButtonClicked(self, model: qt.QAbstractItemModel, index: qt.QModelIndex):
         item = self.getItem(index)
+        volumeName = item.volumeName
+        volumeHierarchy = item.volumeHierarchy
         model.removeRow(index.row())
         del item
-        self.modelDeletedSignal.emit()
+        self.modelDeletedSignal.emit(volumeName, volumeHierarchy)
 
 
 class DicomMetadataButtonItemDelegate(ButtonItemDelegate):

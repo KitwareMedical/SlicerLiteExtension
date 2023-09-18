@@ -18,6 +18,7 @@ class SlicerLiteModuleWidget(qt.QWidget):
         self.deleteButtonItemDelegate = Delegates.DeleteButtonItemDelegate()
         self.dicomTagsButtonItemDelegate = Delegates.DicomMetadataButtonItemDelegate()
         self.deleteButtonItemDelegate.modelDeletedSignal.connect(self.onDeleteVolumeItem)
+        self.deleteButtonItemDelegate.modelDeletedSignal.connect(self.dicomDataLoader.volumeDeleted)
 
         self.buttonsDelegate = [self.deleteButtonItemDelegate, self.dicomTagsButtonItemDelegate]
 
@@ -165,7 +166,7 @@ class SlicerLiteModuleWidget(qt.QWidget):
             self.itemTableView.clearSelection()
             self.itemTableView.selectionModel().setCurrentIndex(self.itemTableModel.index(selectedRowId, 0), qt.QItemSelectionModel.Select)
 
-    def onDeleteVolumeItem(self):
+    def onDeleteVolumeItem(self, deletedVolumeName, deletedVolumeHIerarchy):
         """
         Called after an item is deleted
         Set the current item to the first one

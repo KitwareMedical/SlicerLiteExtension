@@ -16,6 +16,12 @@ class DicomDataLoader():
     def __del__(self):
         DICOMUtils.closeTemporaryDatabase(self.database.originalDatabaseDir)
 
+    def volumeDeleted(self, deletedVolumeName: str, deletedVolumeHierarchy: Model.VolumeHierarchy):
+        """
+        Slot called whe a VolumeItem is deleted
+        """
+        self.alreadyLoadedVolumeHierarchy.remove(deletedVolumeHierarchy)
+
     def loadDicomDirInDBAndExtractVolumesAsItems(self, dicomDirectoryPath: str) -> List[Model.VolumeHierarchy]:
         loadedVolumeHierarchy = []
 
