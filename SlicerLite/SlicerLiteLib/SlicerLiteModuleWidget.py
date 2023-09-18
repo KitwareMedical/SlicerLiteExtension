@@ -1,6 +1,6 @@
 import qt, slicer
 
-from SlicerLiteLib import Delegates, DataLoader, EventFilters, UIUtils, Settings, SlicerUtils, Model
+from SlicerLiteLib import Delegates, DicomDataLoader, EventFilters, UIUtils, Settings, SlicerUtils, Model
 
 
 
@@ -12,7 +12,7 @@ class SlicerLiteModuleWidget(qt.QWidget):
         self.settings = qt.QSettings()
         self.lastSelectedRowIndex = -1
 
-        self.dataLoader = DataLoader()
+        self.dicomDataLoader = DicomDataLoader()
         self.itemTableModel = Model.VolumeItemModel()
         self.itemTableView = qt.QTableView()
         self.deleteButtonItemDelegate = Delegates.DeleteButtonItemDelegate()
@@ -122,7 +122,7 @@ class SlicerLiteModuleWidget(qt.QWidget):
         qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
 
         Settings.SlicerLiteSettings.LastOpenedDirectory = directoryPath
-        loadedVolumesNodes = self.dataLoader.loadDicomDirInDBAndExtractVolumesAsItems(Settings.SlicerLiteSettings.LastOpenedDirectory)
+        loadedVolumesNodes = self.dicomDataLoader.loadDicomDirInDBAndExtractVolumesAsItems(Settings.SlicerLiteSettings.LastOpenedDirectory)
 
         qt.QApplication.restoreOverrideCursor()
 

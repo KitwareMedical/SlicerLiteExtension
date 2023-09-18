@@ -5,7 +5,7 @@ from DICOMLib import DICOMUtils
 from SlicerLiteLib import Model, SlicerUtils
 
 
-class DataLoader():
+class DicomDataLoader():
     """
     Object responsible for loading a DICOM and notifying listeners on DICOM Load
     """
