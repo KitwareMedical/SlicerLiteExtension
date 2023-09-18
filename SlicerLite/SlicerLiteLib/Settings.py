@@ -22,6 +22,7 @@ class DefaultSettings(metaclass=IterableAttributeMeta):
     Each setting will be accessible throught SlicerLite/{parameter_name}
     """
     LastOpenedDirectory = ""
+    DisplayScalarRange = 0.8
 
 
 class SettingsMeta(type):

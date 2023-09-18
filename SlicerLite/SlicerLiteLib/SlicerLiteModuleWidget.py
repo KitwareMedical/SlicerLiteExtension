@@ -1,6 +1,6 @@
 import qt, slicer
 
-from SlicerLiteLib import Delegates, DicomDataLoader, EventFilters, UIUtils, Settings, SlicerUtils, Model
+from SlicerLiteLib import Delegates, DicomDataLoader, EventFilters, UIUtils, Settings, SlicerUtils, Model, SlicerLiteSettings
 
 
 
@@ -211,6 +211,15 @@ class SlicerLiteModuleWidget(qt.QWidget):
         # Set current shift rendering value
         if self.lastSelectedRowIndex >= 0:
             newItem = self.itemTableModel.getVolumeItemFromId(self.lastSelectedRowIndex)
+            minScalar = newItem.getMinScalarValue()
+            maxScalar = newItem.getMaxScalarValue()
+            range = maxScalar - minScalar
+            # Reduce the scalar range to 80% to avoid full white or transparent volumes
+            reducedRange = (1 - SlicerLiteSettings.DisplayScalarRange) / 2
+            newMinimum = minScalar + reducedRange*range
+            newMaximum = maxScalar - reducedRange*range
+            self.shiftSliderWidget.minimum = newMinimum
+            self.shiftSliderWidget.maximum = newMaximum
             self.shiftSliderWidget.blockSignals(True)
             self.shiftSliderWidget.setValue(newItem.shiftRenderingValue)
             self.shiftSliderWidget.blockSignals(False)

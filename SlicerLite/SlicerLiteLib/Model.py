@@ -25,7 +25,7 @@ class VolumeItem:
         self.volumeNode.SetDisplayVisibility(False)
         self.segmentationNode = SlicerUtils.addNode("vtkMRMLSegmentationNode")
         self.segmentationNode.SetName("Segmentation_" + self.volumeName)
-        self.shiftRenderingValue = 0
+        self.shiftRenderingValue = (self.getMinScalarValue() + self.getMaxScalarValue()) / 2
 
     def __ne__(self, other):
         return self.volumeName == other.volumeName
@@ -33,6 +33,18 @@ class VolumeItem:
     def __del__(self):
         slicer.mrmlScene.RemoveNode(self.volumeNode)
         slicer.mrmlScene.RemoveNode(self.segmentationNode)
+
+    def getMinScalarValue(self):
+        """
+        Return the minimum scalar value of the volume node
+        """
+        return self.volumeNode.GetImageData().GetPointData().GetScalars().GetRange()[0]
+
+    def getMaxScalarValue(self):
+        """
+        Return the maximum scalar value of the volume node
+        """
+        return self.volumeNode.GetImageData().GetPointData().GetScalars().GetRange()[1]
 
     def initializeRendering(self):
         volRenLogic = slicer.modules.volumerendering.logic()
