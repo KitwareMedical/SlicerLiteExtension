@@ -123,16 +123,17 @@ class SlicerLiteModuleWidget(qt.QWidget):
         qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
 
         Settings.SlicerLiteSettings.LastOpenedDirectory = directoryPath
-        loadedVolumesNodes = self.dicomDataLoader.loadDicomDirInDBAndExtractVolumesAsItems(Settings.SlicerLiteSettings.LastOpenedDirectory)
+        loadedVolumeHierarchy = self.dicomDataLoader.loadDicomDirInDBAndExtractVolumesAsVolumeHierarchy(Settings.SlicerLiteSettings.LastOpenedDirectory)
 
         qt.QApplication.restoreOverrideCursor()
 
-        if len(loadedVolumesNodes) == 0:
+        if len(loadedVolumeHierarchy) == 0:
             return
 
         lastAddedItem = None
-        for volumeNode in loadedVolumesNodes:
-            lastAddedItem = Model.VolumeItem(volumeNode)
+        for volumeHierarchy in loadedVolumeHierarchy:
+            nbDicomSlices = self.dicomDataLoader.getNumberOfDicomFilesFromVolumeHierarchy(volumeHierarchy)
+            lastAddedItem = Model.VolumeItem(volumeHierarchy, nbDicomSlices)
             index = self.itemTableModel.addItem(lastAddedItem)
             self.itemTableView.closePersistentEditor(index)
 
@@ -167,7 +168,7 @@ class SlicerLiteModuleWidget(qt.QWidget):
             self.itemTableView.clearSelection()
             self.itemTableView.selectionModel().setCurrentIndex(self.itemTableModel.index(selectedRowId, 0), qt.QItemSelectionModel.Select)
 
-    def onDeleteVolumeItem(self, deletedVolumeName, deletedVolumeHIerarchy):
+    def onDeleteVolumeItem(self, deletedVolumeName, deletedVolumeHierarchy):
         """
         Called after an item is deleted
         Set the current item to the first one

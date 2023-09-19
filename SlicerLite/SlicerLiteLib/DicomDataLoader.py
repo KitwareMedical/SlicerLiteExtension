@@ -22,7 +22,7 @@ class DicomDataLoader():
         """
         self.alreadyLoadedVolumeHierarchy.remove(deletedVolumeHierarchy)
 
-    def loadDicomDirInDBAndExtractVolumesAsItems(self, dicomDirectoryPath: str) -> List[Model.VolumeHierarchy]:
+    def loadDicomDirInDBAndExtractVolumesAsVolumeHierarchy(self, dicomDirectoryPath: str) -> List[Model.VolumeHierarchy]:
         loadedVolumeHierarchy = []
 
         if not self.database:
@@ -47,6 +47,12 @@ class DicomDataLoader():
 
         self.alreadyLoadedVolumeHierarchy = self.alreadyLoadedVolumeHierarchy + loadedVolumeHierarchy
         return loadedVolumeHierarchy
+
+    def getNumberOfDicomFilesFromVolumeHierarchy(self, volumeHierarchy):
+        """
+        Get the number of files associated to a volume
+        """
+        return len(slicer.dicomDatabase.instancesForSeries(volumeHierarchy.seriesUID))
 
     def isVolumeItemHierarchyAlreadyAdded(self, patientUID, studyUID, seriesUID, description):
         """

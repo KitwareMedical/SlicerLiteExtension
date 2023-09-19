@@ -17,8 +17,9 @@ class VolumeHierarchy:
 
 
 class VolumeItem:
-    def __init__(self, volumeHierarchy: VolumeHierarchy):
+    def __init__(self, volumeHierarchy: VolumeHierarchy, numberOfSlices):
         self.volumeHierarchy = volumeHierarchy
+        self.numberOfSlices = numberOfSlices
         self.volumeNode = slicer.util.getNode(volumeHierarchy.volumeNodeID)
         self.volumeName = self.volumeNode.GetName()
         self.volumeRenderingDisplayNode = self.initializeRendering()
@@ -78,7 +79,7 @@ class VolumeItemModel(qt.QStandardItemModel):
 
     def addItem(self, item: VolumeItem):
         def createItem(i):
-            displayText = item.volumeName if i == 0 else ""
+            displayText = item.volumeName + "(" + str(item.numberOfSlices) + ")" if i == 0 else ""
             newItem = qt.QStandardItem(displayText)
             newItem.setData(item, VolumeItemModel.ItemUserRole)
             return newItem
