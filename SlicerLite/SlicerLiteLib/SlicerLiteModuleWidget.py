@@ -137,8 +137,9 @@ class SlicerLiteModuleWidget(qt.QWidget):
             self.itemTableView.closePersistentEditor(index)
 
         if lastAddedItem:
-            self.setCurrentVolumeItem(lastAddedItem)
             self.itemTableView.clearSelection()
+            self.setCurrentVolumeItem(lastAddedItem)
+            self.setCurrentSelectedLineOnTableView(self.itemTableModel.rowCount() - 1)
 
     def setCurrentVolumeItem(self, volumeItem: Model.VolumeItem):
         """
