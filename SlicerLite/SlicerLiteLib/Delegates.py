@@ -41,7 +41,7 @@ class DeleteButtonItemDelegate(ButtonItemDelegate):
         self.modelDeletedSignal = Utils.Signal()
 
     def getIcon(self):
-        return Utils.getIcon("close")
+        return Utils.getIcon("delete")
 
     def onButtonClicked(self, model: qt.QAbstractItemModel, index: qt.QModelIndex):
         item = self.getItem(index)

@@ -16,7 +16,7 @@ set(MODULE_PYTHON_SCRIPTS
   )
 
 set(MODULE_PYTHON_RESOURCES
-  Resources/Icons/close.png
+  Resources/Icons/delete.png
   Resources/Icons/metadata.png
   )
 
