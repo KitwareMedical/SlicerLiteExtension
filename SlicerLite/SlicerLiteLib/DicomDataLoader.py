@@ -38,14 +38,14 @@ class DicomDataLoader():
                     seriesDescription = db.descriptionForSeries(seriesUID)
                     if not self.isVolumeItemHierarchyAlreadyAdded(patientUID, studyUID, seriesUID, seriesDescription):
                         volumeNodeID = DICOMUtils.loadSeriesByUID([seriesUID])
-                        if len(volumeNodeID) > 0:
+                        if volumeNodeID:
                             loadedVolumeHierarchy.append(Model.VolumeHierarchy(patientUID, studyUID, seriesUID, volumeNodeID[0], seriesDescription))
 
-        if len(loadedVolumeHierarchy) == 0:
+        if not loadedVolumeHierarchy:
             slicer.util.warningDisplay("No volume has been found from DICOM directory or volume already added.")
             return []
 
-        self.alreadyLoadedVolumeHierarchy = self.alreadyLoadedVolumeHierarchy + loadedVolumeHierarchy
+        self.alreadyLoadedVolumeHierarchy += loadedVolumeHierarchy
         return loadedVolumeHierarchy
 
     def getNumberOfDicomFilesFromVolumeHierarchy(self, volumeHierarchy):
@@ -59,9 +59,11 @@ class DicomDataLoader():
         Check if the input VolumeHierarchy has already been added before
         """
         for volumeItem in self.alreadyLoadedVolumeHierarchy:
-            if volumeItem.patientUID == patientUID and \
-                    volumeItem.studyUID == studyUID and \
-                    volumeItem.seriesUID == seriesUID and \
-                    volumeItem.seriesDescription == description:
+            if (
+                volumeItem.patientUID == patientUID and
+                volumeItem.studyUID == studyUID and
+                volumeItem.seriesUID == seriesUID and
+                volumeItem.seriesDescription == description
+            ):
                 return True
         return False

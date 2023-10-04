@@ -46,8 +46,10 @@ class SlicerLiteModuleWidget(qt.QWidget):
         # Hide headers
         self.itemTableView.horizontalHeader().hide()
         self.itemTableView.verticalHeader().hide()
-        # Hide table borders
+        # Hide contours table borders
         self.itemTableView.setFrameStyle(qt.QFrame.NoFrame)
+        # Hide grid borders
+        self.itemTableView.setGridStyle(qt.Qt.NoPen)
         self.itemTableView.horizontalHeader().setSectionResizeMode(qt.QHeaderView.Stretch)
         self.itemTableView.resizeColumnsToContents()
         # Make lines no editabled
@@ -58,7 +60,7 @@ class SlicerLiteModuleWidget(qt.QWidget):
         self.itemTableView.clicked.connect(self.onTableViewItemClicked)
         self.itemTableView.setModel(self.itemTableModel)
 
-        self.layout().addWidget(UIUtils.createButton("Load", callback=self.onClickLoadDicomDirectory))
+        self.layout().addWidget(UIUtils.createButton("Load volume", callback=self.onClickLoadVolume))
         self.layout().addWidget(qt.QLabel("Loaded volumes:"))
         self.layout().addWidget(self.itemTableView)
 
@@ -104,7 +106,7 @@ class SlicerLiteModuleWidget(qt.QWidget):
     def rotateSliceViewsToSegmentation(self):
         self.segmentEditorWidget.rotateSliceViewsToSegmentation()
 
-    def onClickLoadDicomDirectory(self):
+    def onClickLoadVolume(self):
         """
         User choose directory where DICOM will be extracted
         """
@@ -164,19 +166,21 @@ class SlicerLiteModuleWidget(qt.QWidget):
         """
         Manually change the selected row to the selectedRowId
         """
-        if 0 <= selectedRowId < self.itemTableModel.rowCount:
-            self.itemTableView.clearSelection()
-            self.itemTableView.selectionModel().setCurrentIndex(self.itemTableModel.index(selectedRowId, 0), qt.QItemSelectionModel.Select)
+        if selectedRowId < 0 or selectedRowId >= self.itemTableModel.rowCount():
+            return
+        self.itemTableView.clearSelection()
+        self.itemTableView.selectionModel().setCurrentIndex(self.itemTableModel.index(selectedRowId, 0), qt.QItemSelectionModel.Select)
 
     def onDeleteVolumeItem(self, deletedVolumeName, deletedVolumeHierarchy):
         """
         Called after an item is deleted
         Set the current item to the first one
         """
-        if self.itemTableModel.rowCount() > 0:
-            self.setCurrentVolumeItem(self.itemTableModel.getVolumeItemFromId(0))
-            self.setCurrentSelectedLineOnTableView(0)
-            self.lastSelectedRowIndex = 0
+        if self.itemTableModel.rowCount() <= 0:
+            return
+        self.setCurrentVolumeItem(self.itemTableModel.getVolumeItemFromId(0))
+        self.setCurrentSelectedLineOnTableView(0)
+        self.lastSelectedRowIndex = 0
 
     def setCurrentSelectedLineOnTableView(self, rowID):
         """

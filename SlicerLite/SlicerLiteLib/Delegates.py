@@ -22,12 +22,14 @@ class ButtonItemDelegate(qt.QStyledItemDelegate):
         return index.data(Model.VolumeItemModel.ItemUserRole)
 
     def createEditor(self, parent, option, index):
-        if index.column() in (1, 2):
-            button = qt.QPushButton(parent)
-            button.icon = self.getIcon()
-            button.iconSize = qt.QSize(22, 22)
-            button.clicked.connect(lambda _:self.onButtonClicked(index.model(), index))
-            return button
+        if index.column() not in (1, 2):
+            return None
+
+        button = qt.QPushButton(parent)
+        button.icon = self.getIcon()
+        button.iconSize = qt.QSize(22, 22)
+        button.clicked.connect(lambda _:self.onButtonClicked(index.model(), index))
+        return button
 
     def updateEditorGeometry(self, editor: qt.QWidget, option: 'QStyleOptionViewItem', index: qt.QModelIndex):
         if editor:
