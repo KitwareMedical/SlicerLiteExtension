@@ -110,7 +110,7 @@ class SlicerLiteModuleWidget(qt.QWidget):
         """
         dirPath = qt.QFileDialog.getExistingDirectory(self,
                                                      "Choose dicom file directory to load",
-                                                     SlicerLiteSettings.LastOpenedDirectory)
+                                                     Settings.SlicerLiteSettings.LastOpenedDirectory)
         if not dirPath:
             return
         self.loadDicomDirectory(dirPath)
