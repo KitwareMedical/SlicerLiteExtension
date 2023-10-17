@@ -17,10 +17,10 @@ class VolumeHierarchy:
 
 
 class VolumeItem:
-    def __init__(self, volumeHierarchy: VolumeHierarchy, numberOfSlices):
+    def __init__(self, volumeHierarchy: VolumeHierarchy, numberOfSlices, volumeNode=None):
         self.volumeHierarchy = volumeHierarchy
         self.numberOfSlices = numberOfSlices
-        self.volumeNode = slicer.util.getNode(volumeHierarchy.volumeNodeID)
+        self.volumeNode = volumeNode if volumeNode else slicer.util.getNode(volumeHierarchy.volumeNodeID)
         self.volumeName = self.volumeNode.GetName()
         self.volumeRenderingDisplayNode = self.initializeRendering()
         self.volumeNode.SetDisplayVisibility(False)
@@ -46,6 +46,9 @@ class VolumeItem:
         Return the maximum scalar value of the volume node
         """
         return self.volumeNode.GetImageData().GetPointData().GetScalars().GetRange()[1]
+
+    def isDicomVolumeItem(self):
+        return self.volumeHierarchy.volumeNodeID != ""
 
     def initializeRendering(self):
         volRenLogic = slicer.modules.volumerendering.logic()

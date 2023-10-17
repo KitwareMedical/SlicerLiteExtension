@@ -55,6 +55,12 @@ class DeleteButtonItemDelegate(ButtonItemDelegate):
 
 
 class DicomMetadataButtonItemDelegate(ButtonItemDelegate):
+
+    def createEditor(self, parent, option, index):
+        if not index.model().getVolumeItemFromId(index.row()).isDicomVolumeItem():
+            return
+        super().createEditor(parent, option, index)
+
     def getIcon(self):
         return Utils.getIcon("metadata")
 

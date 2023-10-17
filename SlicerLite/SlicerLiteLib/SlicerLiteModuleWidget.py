@@ -23,7 +23,7 @@ class SlicerLiteModuleWidget(qt.QWidget):
         self.buttonsDelegate = [self.deleteButtonItemDelegate, self.dicomTagsButtonItemDelegate]
 
         # Setup event filter
-        self.filter = EventFilters.DragAndDropEventFilter(slicer.util.mainWindow(), self.loadDicomDirectory)
+        self.filter = EventFilters.DragAndDropEventFilter(slicer.util.mainWindow(), self.loadInputData)
         slicer.util.mainWindow().installEventFilter(self.filter)
 
         self.setupUI()
@@ -60,7 +60,11 @@ class SlicerLiteModuleWidget(qt.QWidget):
         self.itemTableView.clicked.connect(self.onTableViewItemClicked)
         self.itemTableView.setModel(self.itemTableModel)
 
-        self.layout().addWidget(UIUtils.createButton("Load volume", callback=self.onClickLoadVolume))
+        layoutLoadVolumes = qt.QHBoxLayout()
+        layoutLoadVolumes.addWidget(UIUtils.createButton("Load DICOM", callback=self.onClickLoadDicomVolume))
+        layoutLoadVolumes.addWidget(UIUtils.createButton("Load volume", callback=self.onClickLoadVolume))
+
+        self.layout().addLayout(layoutLoadVolumes)
         self.layout().addWidget(qt.QLabel("Loaded volumes:"))
         self.layout().addWidget(self.itemTableView)
 
@@ -106,7 +110,7 @@ class SlicerLiteModuleWidget(qt.QWidget):
     def rotateSliceViewsToSegmentation(self):
         self.segmentEditorWidget.rotateSliceViewsToSegmentation()
 
-    def onClickLoadVolume(self):
+    def onClickLoadDicomVolume(self):
         """
         User choose directory where DICOM will be extracted
         """
@@ -115,27 +119,51 @@ class SlicerLiteModuleWidget(qt.QWidget):
                                                      Settings.SlicerLiteSettings.LastOpenedDirectory)
         if not dirPath:
             return
-        self.loadDicomDirectory(dirPath)
+        self.loadInputData(dirPath)
 
-    def loadDicomDirectory(self, directoryPath: str):
+
+    def onClickLoadVolume(self):
+        """
+        User choose volume file to load
+        """
+        volumePath = qt.QFileDialog.getOpenFileName(self, "Load volume",
+                                                    Settings.SlicerLiteSettings.LastOpenedDirectory,
+                                                    "Meta Image (*.nii, *.nii.gz)")
+        if not volumePath:
+            return
+
+        self.loadInputData(volumePath)
+
+
+    def loadInputData(self, inputPath: str):
         """
         Add and load the input dicom dir into the DICOM database
         directory_path: Path to the directory that contains dicoms
         """
         qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
 
-        Settings.SlicerLiteSettings.LastOpenedDirectory = directoryPath
-        loadedVolumeHierarchy = self.dicomDataLoader.loadDicomDirInDBAndExtractVolumesAsVolumeHierarchy(Settings.SlicerLiteSettings.LastOpenedDirectory)
+        loadedVolumesNodes = []
+        volumeNode = None
+
+        if qt.QFileInfo(inputPath).isDir():
+            Settings.SlicerLiteSettings.LastOpenedDirectory = inputPath
+            loadedVolumesNodes = self.dataLoader.loadDicomDirInDBAndExtractVolumesAsItems(
+                Settings.SlicerLiteSettings.LastOpenedDirectory)
+        else:
+            Settings.SlicerLiteSettings.LastOpenedDirectory = qt.QFileInfo(inputPath).absolutePath()
+            hierarchy, volumeNode = self.dataLoader.loadVolume(inputPath)
+            loadedVolumesNodes = [hierarchy]
+
 
         qt.QApplication.restoreOverrideCursor()
 
-        if len(loadedVolumeHierarchy) == 0:
+        if len(loadedVolumesNodes) == 0:
             return
 
         lastAddedItem = None
-        for volumeHierarchy in loadedVolumeHierarchy:
-            nbDicomSlices = self.dicomDataLoader.getNumberOfDicomFilesFromVolumeHierarchy(volumeHierarchy)
-            lastAddedItem = Model.VolumeItem(volumeHierarchy, nbDicomSlices)
+        for volumeNodeHierarchy in loadedVolumesNodes:
+            nbDicomSlices = self.dicomDataLoader.getNumberOfDicomFilesFromVolumeHierarchy(volumeNodeHierarchy)
+            lastAddedItem = Model.VolumeItem(volumeNodeHierarchy, nbDicomSlices, volumeNode)
             index = self.itemTableModel.addItem(lastAddedItem)
             self.itemTableView.closePersistentEditor(index)
 

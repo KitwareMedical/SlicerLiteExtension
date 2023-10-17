@@ -67,3 +67,7 @@ class DicomDataLoader():
             ):
                 return True
         return False
+
+    def loadVolume(self, filePath):
+        volume = slicer.util.loadVolume(filePath)
+        return (Model.VolumeHierarchy("", "", "", "", ""), volume)
