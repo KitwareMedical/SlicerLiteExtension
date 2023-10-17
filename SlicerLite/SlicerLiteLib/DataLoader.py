@@ -20,7 +20,8 @@ class DataLoader():
         """
         Slot called whe a VolumeItem is deleted
         """
-        self.alreadyLoadedVolumeHierarchy.remove(deletedVolumeHierarchy)
+        if deletedVolumeHierarchy in self.alreadyLoadedVolumeHierarchy:
+            self.alreadyLoadedVolumeHierarchy.remove(deletedVolumeHierarchy)
 
     def loadDicomDirInDBAndExtractVolumesAsItems(self, dicomDirectoryPath: str) -> List[Model.VolumeHierarchy]:
         loadedVolumeHierarchy = []
