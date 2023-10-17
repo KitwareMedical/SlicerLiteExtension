@@ -133,7 +133,7 @@ class SlicerLiteModuleWidget(qt.QWidget):
         """
         volumePath = qt.QFileDialog.getOpenFileName(self, "Load volume",
                                                     Settings.SlicerLiteSettings.LastOpenedDirectory,
-                                                    "Meta Image (*.nii, *.nii.gz)")
+                                                    "Image (*.nii, *.nii.gz, *mha, *nrrd)")
         if not volumePath:
             return
 
