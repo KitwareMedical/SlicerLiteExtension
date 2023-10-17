@@ -5,7 +5,7 @@ from DICOMLib import DICOMUtils
 from SlicerLiteLib import Model, SlicerUtils
 
 
-class DicomDataLoader():
+class DataLoader():
     """
     Object responsible for loading a DICOM and notifying listeners on DICOM Load
     """
@@ -22,7 +22,7 @@ class DicomDataLoader():
         """
         self.alreadyLoadedVolumeHierarchy.remove(deletedVolumeHierarchy)
 
-    def loadDicomDirInDBAndExtractVolumesAsVolumeHierarchy(self, dicomDirectoryPath: str) -> List[Model.VolumeHierarchy]:
+    def loadDicomDirInDBAndExtractVolumesAsItems(self, dicomDirectoryPath: str) -> List[Model.VolumeHierarchy]:
         loadedVolumeHierarchy = []
 
         if not self.database:

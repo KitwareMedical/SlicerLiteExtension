@@ -7,7 +7,6 @@ from SlicerLiteLib import Model, Utils, SlicerUtils
 class ButtonItemDelegate(qt.QStyledItemDelegate):
     def __init__(self, parent=None):
         super(ButtonItemDelegate, self).__init__(parent)
-        self.current_selected_row = -1
 
     def getIcon(self):
         pass
@@ -15,11 +14,11 @@ class ButtonItemDelegate(qt.QStyledItemDelegate):
     def onButtonClicked(self, model: qt.QAbstractItemModel, index: qt.QModelIndex):
         pass
 
-    def isRowSelected(self, index: qt.QModelIndex):
-        return self.current_selected_row == index.row()
-
     def getItem(self, index: qt.QModelIndex):
         return index.data(Model.VolumeItemModel.ItemUserRole)
+
+    def sizeHint(self, option: qt.QStyleOptionViewItem, index: qt.QModelIndex):
+        return qt.QSize(22, 22)
 
     def createEditor(self, parent, option, index):
         if index.column() not in (1, 2):
@@ -28,7 +27,8 @@ class ButtonItemDelegate(qt.QStyledItemDelegate):
         button = qt.QPushButton(parent)
         button.icon = self.getIcon()
         button.iconSize = qt.QSize(22, 22)
-        button.clicked.connect(lambda _:self.onButtonClicked(index.model(), index))
+        button.setMinimumSize(qt.QSize(22, 22))
+        button.clicked.connect(lambda _: self.onButtonClicked(index.model(), index))
         return button
 
     def updateEditorGeometry(self, editor: qt.QWidget, option: 'QStyleOptionViewItem', index: qt.QModelIndex):
@@ -59,7 +59,7 @@ class DicomMetadataButtonItemDelegate(ButtonItemDelegate):
     def createEditor(self, parent, option, index):
         if not index.model().getVolumeItemFromId(index.row()).isDicomVolumeItem():
             return
-        super().createEditor(parent, option, index)
+        return super().createEditor(parent, option, index)
 
     def getIcon(self):
         return Utils.getIcon("metadata")

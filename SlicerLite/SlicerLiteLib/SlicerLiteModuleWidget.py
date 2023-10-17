@@ -1,6 +1,6 @@
 import qt, slicer
 
-from SlicerLiteLib import Delegates, DicomDataLoader, EventFilters, UIUtils, Settings, SlicerUtils, Model, SlicerLiteSettings
+from SlicerLiteLib import Delegates, DataLoader, EventFilters, UIUtils, Settings, SlicerUtils, Model, SlicerLiteSettings
 
 
 
@@ -12,15 +12,13 @@ class SlicerLiteModuleWidget(qt.QWidget):
         self.settings = qt.QSettings()
         self.lastSelectedRowIndex = -1
 
-        self.dicomDataLoader = DicomDataLoader()
+        self.dataLoader = DataLoader()
         self.itemTableModel = Model.VolumeItemModel()
         self.itemTableView = qt.QTableView()
         self.deleteButtonItemDelegate = Delegates.DeleteButtonItemDelegate()
         self.dicomTagsButtonItemDelegate = Delegates.DicomMetadataButtonItemDelegate()
         self.deleteButtonItemDelegate.modelDeletedSignal.connect(self.onDeleteVolumeItem)
-        self.deleteButtonItemDelegate.modelDeletedSignal.connect(self.dicomDataLoader.volumeDeleted)
-
-        self.buttonsDelegate = [self.deleteButtonItemDelegate, self.dicomTagsButtonItemDelegate]
+        self.deleteButtonItemDelegate.modelDeletedSignal.connect(self.dataLoader.volumeDeleted)
 
         # Setup event filter
         self.filter = EventFilters.DragAndDropEventFilter(slicer.util.mainWindow(), self.loadInputData)
@@ -39,7 +37,7 @@ class SlicerLiteModuleWidget(qt.QWidget):
 
     def setupTableViewLayout(self):
         """
-        Setup the table view behavior/display
+        Set up the table view behavior/display
         """
         self.itemTableView.setItemDelegateForColumn(1, self.dicomTagsButtonItemDelegate)
         self.itemTableView.setItemDelegateForColumn(2, self.deleteButtonItemDelegate)
@@ -49,10 +47,15 @@ class SlicerLiteModuleWidget(qt.QWidget):
         # Hide contours table borders
         self.itemTableView.setFrameStyle(qt.QFrame.NoFrame)
         # Hide grid borders
-        self.itemTableView.setGridStyle(qt.Qt.NoPen)
-        self.itemTableView.horizontalHeader().setSectionResizeMode(qt.QHeaderView.Stretch)
+        self.itemTableView.showGrid = False
+        # self.itemTableView.horizontalHeader().setSectionResizeMode(qt.QHeaderView.Stretch)
+        # self.itemTableView.horizontalHeader().resizeSection(1, 32)
+        # self.itemTableView.horizontalHeader().resizeSection(2, 32)
+        # self.itemTableView.setColumnWidth(0, 80)
+        # self.itemTableView.setColumnWidth(1, 22)
+        # self.itemTableView.setColumnWidth(2, 22)
         self.itemTableView.resizeColumnsToContents()
-        # Make lines no editabled
+        # Make lines no editable
         self.itemTableView.setEditTriggers(qt.QAbstractItemView.NoEditTriggers)
         # Allow only one selection
         self.itemTableView.setSelectionMode(qt.QAbstractItemView.SingleSelection)
@@ -95,8 +98,8 @@ class SlicerLiteModuleWidget(qt.QWidget):
 
         # Define list of hidden widgets inside segment editor widget
         hiddenWidgetsNames = ["SourceVolumeNodeLabel", "SourceVolumeNodeComboBox",
-                                "SegmentationNodeLabel", "SegmentationNodeComboBox",
-                                "SpecifyGeometryButton", "SwitchToSegmentationsButton"]
+                              "SegmentationNodeLabel", "SegmentationNodeComboBox",
+                              "SpecifyGeometryButton", "SwitchToSegmentationsButton"]
         for hiddenWidgetName in hiddenWidgetsNames:
             widget = slicer.util.findChild(self.segmentEditorWidget, hiddenWidgetName)
             if widget:
@@ -115,12 +118,14 @@ class SlicerLiteModuleWidget(qt.QWidget):
         User choose directory where DICOM will be extracted
         """
         dirPath = qt.QFileDialog.getExistingDirectory(self,
-                                                     "Choose dicom file directory to load",
-                                                     Settings.SlicerLiteSettings.LastOpenedDirectory)
+                                                      "Choose dicom file directory to load",
+                                                      Settings.SlicerLiteSettings.LastOpenedDirectory)
         if not dirPath:
             return
         self.loadInputData(dirPath)
 
+        # self.loadDicomDirectory(r"C:\EDP-DATA\1-001\IRM pre et post avec contours xml")
+        # self.loadDicomDirectory(r"C:\Kitware\Dicom\DataAnonymized2")
 
     def onClickLoadVolume(self):
         """
@@ -134,11 +139,10 @@ class SlicerLiteModuleWidget(qt.QWidget):
 
         self.loadInputData(volumePath)
 
-
     def loadInputData(self, inputPath: str):
         """
         Add and load the input dicom dir into the DICOM database
-        directory_path: Path to the directory that contains dicoms
+        directory_path: Path to the directory that contains dicom
         """
         qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
 
@@ -154,7 +158,6 @@ class SlicerLiteModuleWidget(qt.QWidget):
             hierarchy, volumeNode = self.dataLoader.loadVolume(inputPath)
             loadedVolumesNodes = [hierarchy]
 
-
         qt.QApplication.restoreOverrideCursor()
 
         if len(loadedVolumesNodes) == 0:
@@ -162,7 +165,7 @@ class SlicerLiteModuleWidget(qt.QWidget):
 
         lastAddedItem = None
         for volumeNodeHierarchy in loadedVolumesNodes:
-            nbDicomSlices = self.dicomDataLoader.getNumberOfDicomFilesFromVolumeHierarchy(volumeNodeHierarchy)
+            nbDicomSlices = self.dataLoader.getNumberOfDicomFilesFromVolumeHierarchy(volumeNodeHierarchy)
             lastAddedItem = Model.VolumeItem(volumeNodeHierarchy, nbDicomSlices, volumeNode)
             index = self.itemTableModel.addItem(lastAddedItem)
             self.itemTableView.closePersistentEditor(index)
@@ -197,7 +200,8 @@ class SlicerLiteModuleWidget(qt.QWidget):
         if selectedRowId < 0 or selectedRowId >= self.itemTableModel.rowCount():
             return
         self.itemTableView.clearSelection()
-        self.itemTableView.selectionModel().setCurrentIndex(self.itemTableModel.index(selectedRowId, 0), qt.QItemSelectionModel.Select)
+        self.itemTableView.selectionModel().setCurrentIndex(self.itemTableModel.index(selectedRowId, 0),
+                                                            qt.QItemSelectionModel.Select)
 
     def onDeleteVolumeItem(self, deletedVolumeName, deletedVolumeHierarchy):
         """
@@ -231,6 +235,7 @@ class SlicerLiteModuleWidget(qt.QWidget):
             return
 
         volumeItem = modelIndex.model().item(modelIndex.row()).data(Model.VolumeItemModel.ItemUserRole)
+        # We only want to select line if user click on volume's name
         if modelIndex.row() == self.lastSelectedRowIndex:
             return
 
