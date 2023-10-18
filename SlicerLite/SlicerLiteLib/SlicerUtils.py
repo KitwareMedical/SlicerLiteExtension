@@ -45,3 +45,11 @@ def getDicomWidget():
         return slicer.modules.DICOMWidget
     except AttributeError:
         return slicer.modules.dicom.widgetRepresentation().self()
+
+
+def updateMenubarsAndToolBarsSlicerVisibility(visible):
+    mainWindow = slicer.util.mainWindow()
+    mainWindow.menuBar().setVisible(visible)
+    mainWindow.MainToolBar.setVisible(visible)
+    mainWindow.ModuleSelectorToolBar.setVisible(visible)
+    slicer.util.setToolbarsVisible(visible)

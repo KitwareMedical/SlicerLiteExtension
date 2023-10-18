@@ -26,6 +26,12 @@ class SlicerLiteModuleWidget(qt.QWidget):
 
         self.setupUI()
 
+    def showEvent(self, event: qt.QShowEvent):
+        SlicerUtils.updateMenubarsAndToolBarsSlicerVisibility(False)
+
+    def hideEvent(self, event: qt.QHideEvent):
+        SlicerUtils.updateMenubarsAndToolBarsSlicerVisibility(True)
+
     def setupUI(self):
         """
         Create and initialize UI components
