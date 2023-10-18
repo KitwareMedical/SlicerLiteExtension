@@ -1,5 +1,5 @@
-import vtk, slicer
-
+import vtk
+import slicer
 
 SlicesNames = ["Red", "Yellow", "Green"]
 
@@ -47,7 +47,7 @@ def getDicomWidget():
         return slicer.modules.dicom.widgetRepresentation().self()
 
 
-def updateMenubarsAndToolBarsSlicerVisibility(visible):
+def updateMenuBarsAndToolBarsSlicerVisibility(visible):
     mainWindow = slicer.util.mainWindow()
     mainWindow.menuBar().setVisible(visible)
     mainWindow.MainToolBar.setVisible(visible)

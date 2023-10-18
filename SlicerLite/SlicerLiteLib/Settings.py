@@ -3,7 +3,7 @@ import qt
 
 class IterableAttributeMeta(type):
     """
-    Meta class allowing to iterate of the the public attributes.
+    Metaclass allowing to iterate on the public attributes.
     """
 
     def __iter__(self):
@@ -19,7 +19,7 @@ class IterableAttributeMeta(type):
 class DefaultSettings(metaclass=IterableAttributeMeta):
     """
     Default settings of the application.
-    Each setting will be accessible throught SlicerLite/{parameter_name}
+    Each setting will be accessible through SlicerLite/{parameter_name}
     """
     LastOpenedDirectory = ""
     DisplayScalarRange = 0.8

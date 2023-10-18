@@ -90,13 +90,13 @@ class VolumeItemModel(qt.QStandardItemModel):
         self.appendRow([createItem(i) for i in range(3)])
         return self.index(self.rowCount(), self.columnCount())
 
-    def getVolumeItemFromId(self, id):
+    def getVolumeItemFromId(self, volumeId):
         """
         Get the VolumeItem at the id row position.
         If not found, then return None
         """
-        if id < self.rowCount():
-            return self.item(id).data(VolumeItemModel.ItemUserRole)
+        if volumeId < self.rowCount():
+            return self.item(volumeId).data(VolumeItemModel.ItemUserRole)
         return None
 
     def getVolumeIdFromVolumeItem(self, volumeItem: VolumeItem):

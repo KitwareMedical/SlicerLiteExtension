@@ -1,4 +1,6 @@
-import qt, ctk
+import qt
+import ctk
+
 
 def createButton(name, callback=None, isCheckable=False, icon=None) -> qt.QPushButton:
     """Helper function to create a button with a text, callback on click and checkable status
@@ -11,6 +13,7 @@ def createButton(name, callback=None, isCheckable=False, icon=None) -> qt.QPushB
       Called method when button is clicked
     isCheckable: bool
       If true, the button will be checkable
+    icon: QImage
     """
     button = qt.QPushButton(name)
     if callback is not None:
@@ -19,6 +22,7 @@ def createButton(name, callback=None, isCheckable=False, icon=None) -> qt.QPushB
         button.setIcon(icon)
     button.setCheckable(isCheckable)
     return button
+
 
 def wrapInCollapsibleButton(childWidget, collapsibleText, isCollapsed=True):
     """Wraps input childWidget into a collapsible button.

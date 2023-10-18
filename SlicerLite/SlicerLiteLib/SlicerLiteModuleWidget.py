@@ -1,6 +1,8 @@
-import qt, slicer
+import qt
+import slicer
 
-from SlicerLiteLib import Delegates, DataLoader, EventFilters, UIUtils, Settings, SlicerUtils, Model, SlicerLiteSettings
+from SlicerLiteLib import Delegates, DataLoader, EventFilters, UIUtils, Settings, SlicerUtils, Model, SlicerLiteSettings, \
+getNumberOfDicomFilesFromVolumeHierarchy
 
 
 
@@ -11,6 +13,11 @@ class SlicerLiteModuleWidget(qt.QWidget):
         qt.QVBoxLayout(self)
         self.settings = qt.QSettings()
         self.lastSelectedRowIndex = -1
+
+        self.segmentEditorWidget = None
+        self.segmentEditorNode = None
+        self.renderingModule = None
+        self.shiftSliderWidget = None
 
         self.dataLoader = DataLoader()
         self.itemTableModel = Model.VolumeItemModel()
@@ -27,10 +34,10 @@ class SlicerLiteModuleWidget(qt.QWidget):
         self.setupUI()
 
     def showEvent(self, event: qt.QShowEvent):
-        SlicerUtils.updateMenubarsAndToolBarsSlicerVisibility(False)
+        SlicerUtils.updateMenuBarsAndToolBarsSlicerVisibility(False)
 
     def hideEvent(self, event: qt.QHideEvent):
-        SlicerUtils.updateMenubarsAndToolBarsSlicerVisibility(True)
+        SlicerUtils.updateMenuBarsAndToolBarsSlicerVisibility(True)
 
     def setupUI(self):
         """
@@ -171,7 +178,7 @@ class SlicerLiteModuleWidget(qt.QWidget):
 
         lastAddedItem = None
         for volumeNodeHierarchy in loadedVolumesNodes:
-            nbDicomSlices = self.dataLoader.getNumberOfDicomFilesFromVolumeHierarchy(volumeNodeHierarchy)
+            nbDicomSlices = getNumberOfDicomFilesFromVolumeHierarchy(volumeNodeHierarchy)
             lastAddedItem = Model.VolumeItem(volumeNodeHierarchy, nbDicomSlices, volumeNode)
             index = self.itemTableModel.addItem(lastAddedItem)
             self.itemTableView.closePersistentEditor(index)
@@ -258,11 +265,11 @@ class SlicerLiteModuleWidget(qt.QWidget):
             newItem = self.itemTableModel.getVolumeItemFromId(self.lastSelectedRowIndex)
             minScalar = newItem.getMinScalarValue()
             maxScalar = newItem.getMaxScalarValue()
-            range = maxScalar - minScalar
+            volumeRange = maxScalar - minScalar
             # Reduce the scalar range to 80% to avoid full white or transparent volumes
             reducedRange = (1 - SlicerLiteSettings.DisplayScalarRange) / 2
-            newMinimum = minScalar + reducedRange*range
-            newMaximum = maxScalar - reducedRange*range
+            newMinimum = minScalar + reducedRange * volumeRange
+            newMaximum = maxScalar - reducedRange * volumeRange
             self.shiftSliderWidget.minimum = newMinimum
             self.shiftSliderWidget.maximum = newMaximum
             self.shiftSliderWidget.blockSignals(True)

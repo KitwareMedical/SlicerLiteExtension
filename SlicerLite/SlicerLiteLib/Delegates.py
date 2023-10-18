@@ -1,7 +1,12 @@
 from enum import Enum
-import qt, ctk
+import qt
+import ctk
 
 from SlicerLiteLib import Model, Utils, SlicerUtils
+
+
+def getItem(index: qt.QModelIndex):
+    return index.data(Model.VolumeItemModel.ItemUserRole)
 
 
 class ButtonItemDelegate(qt.QStyledItemDelegate):
@@ -13,9 +18,6 @@ class ButtonItemDelegate(qt.QStyledItemDelegate):
 
     def onButtonClicked(self, model: qt.QAbstractItemModel, index: qt.QModelIndex):
         pass
-
-    def getItem(self, index: qt.QModelIndex):
-        return index.data(Model.VolumeItemModel.ItemUserRole)
 
     def sizeHint(self, option: qt.QStyleOptionViewItem, index: qt.QModelIndex):
         return qt.QSize(22, 22)
@@ -46,7 +48,7 @@ class DeleteButtonItemDelegate(ButtonItemDelegate):
         return Utils.getIcon("delete")
 
     def onButtonClicked(self, model: qt.QAbstractItemModel, index: qt.QModelIndex):
-        item = self.getItem(index)
+        item = getItem(index)
         volumeName = item.volumeName
         volumeHierarchy = item.volumeHierarchy
         model.removeRow(index.row())
@@ -65,7 +67,7 @@ class DicomMetadataButtonItemDelegate(ButtonItemDelegate):
         return Utils.getIcon("metadata")
 
     def onButtonClicked(self, model: qt.QAbstractItemModel, index: qt.QModelIndex):
-        item = self.getItem(index)
+        item = getItem(index)
         dicom_widget = SlicerUtils.getDicomWidget()
         dicom_browser = dicom_widget.browserWidget.dicomBrowser
         dicom_browser.dicomTableManager().setCurrentPatientsSelection([item.volumeHierarchy.patientUID])
