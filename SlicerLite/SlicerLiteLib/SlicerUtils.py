@@ -53,3 +53,23 @@ def updateMenuBarsAndToolBarsSlicerVisibility(visible):
     mainWindow.MainToolBar.setVisible(visible)
     mainWindow.ModuleSelectorToolBar.setVisible(visible)
     slicer.util.setToolbarsVisible(visible)
+
+
+def getToolBarVisibilityButton():
+    """
+    Create and return a QPushButton checkable which show/hide slicer's (tool/menu)bar
+    """
+    from SlicerLiteLib import UIUtils, Utils
+
+    buttonVisibility = None
+
+    def onVisibilityToolbarButtonClicked(isChecked):
+        updateMenuBarsAndToolBarsSlicerVisibility(isChecked)
+        if isChecked:
+            buttonVisibility.setIcon(Utils.getIcon("hide_toolbar"))
+        else:
+            buttonVisibility.setIcon(Utils.getIcon("toolbar"))
+
+    buttonVisibility = UIUtils.createButton("", isCheckable=True, callback=onVisibilityToolbarButtonClicked,
+                                            icon=Utils.getIcon("toolbar"))
+    return buttonVisibility

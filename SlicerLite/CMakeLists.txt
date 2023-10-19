@@ -17,7 +17,9 @@ set(MODULE_PYTHON_SCRIPTS
 
 set(MODULE_PYTHON_RESOURCES
   Resources/Icons/delete.png
+  Resources/Icons/hide_toolbar.png
   Resources/Icons/metadata.png
+  Resources/Icons/toolbar.png
   )
 
 #-----------------------------------------------------------------------------
