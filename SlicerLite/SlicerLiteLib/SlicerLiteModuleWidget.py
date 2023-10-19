@@ -43,6 +43,8 @@ class SlicerLiteModuleWidget(qt.QWidget):
         """
         Create and initialize UI components
         """
+        self.layout().addWidget(UIUtils.createButton("Hide/Show toolbar", isCheckable=True,
+                                           callback=SlicerUtils.updateMenuBarsAndToolBarsSlicerVisibility))
         self.setupTableViewLayout()
         self.setupRenderingLayout()
         self.setupSegmentationLayout()
