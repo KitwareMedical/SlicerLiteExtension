@@ -72,4 +72,6 @@ def getToolBarVisibilityButton():
 
     buttonVisibility = UIUtils.createButton("", isCheckable=True, callback=onVisibilityToolbarButtonClicked,
                                             icon=Utils.getIcon("toolbar"))
+    # Add new connection to handle when setChecked is called to correctly update icon
+    buttonVisibility.connect("toggled(bool)", onVisibilityToolbarButtonClicked)
     return buttonVisibility

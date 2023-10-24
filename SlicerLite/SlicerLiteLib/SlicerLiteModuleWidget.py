@@ -27,6 +27,8 @@ class SlicerLiteModuleWidget(qt.QWidget):
         self.deleteButtonItemDelegate.modelDeletedSignal.connect(self.onDeleteVolumeItem)
         self.deleteButtonItemDelegate.modelDeletedSignal.connect(self.dataLoader.volumeDeleted)
 
+        self.toolbarVisibilityButton = SlicerUtils.getToolBarVisibilityButton()
+
         # Setup event filter
         self.filter = EventFilters.DragAndDropEventFilter(slicer.util.mainWindow(), self.loadInputData)
         slicer.util.mainWindow().installEventFilter(self.filter)
@@ -34,16 +36,19 @@ class SlicerLiteModuleWidget(qt.QWidget):
         self.setupUI()
 
     def showEvent(self, event: qt.QShowEvent):
+        self.toolbarVisibilityButton.setChecked(False)
+        # Need to keep this line for the first launch
         SlicerUtils.updateMenuBarsAndToolBarsSlicerVisibility(False)
 
     def hideEvent(self, event: qt.QHideEvent):
+        self.toolbarVisibilityButton.setChecked(True)
         SlicerUtils.updateMenuBarsAndToolBarsSlicerVisibility(True)
 
     def setupUI(self):
         """
         Create and initialize UI components
         """
-        self.layout().addWidget(SlicerUtils.getToolBarVisibilityButton())
+        self.layout().addWidget(self.toolbarVisibilityButton)
         self.setupTableViewLayout()
         self.setupRenderingLayout()
         self.setupSegmentationLayout()
